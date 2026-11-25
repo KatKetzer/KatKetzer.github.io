@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ketzer: Mexico to London</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Silkscreen&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: playful, warm, a little cheeky; Kat's own voice, never corporate.
+   IDEA: a side-scrolling pixel game. Kat walks a Mexican street where every shop is a project, then catches the flight to London.
+   PICTURE: the game screen itself, a 16:9 pixel world in a chunky console frame, with her own sprite.
+   COLOUR and TYPE: her brand, turquoise sky fading to beige, black outlines; Pixelify Sans and Silkscreen over Jost for reading.
+   LAYOUT: game first under a slim bar; dialog windows for each project; a no-play list for recruiters in a hurry. */
+:root{color-scheme:light dark;--bg:light-dark(#efe6d6,#121212);--ink:light-dark(#141113,#f1eadc);--card:#f6f0e4;--tq:#14a396;--mute:light-dark(#5f584d,#a8a092)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Jost,system-ui,sans-serif;overflow-x:clip}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--tq);outline-offset:2px}
+.px{font-family:"Pixelify Sans",monospace}
+header{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:12px max(3vw,12px)}
+.logo{font:700 26px/1 "Pixelify Sans",monospace;letter-spacing:.02em}
+.logo span{color:var(--tq)}
+.bar{display:flex;flex-wrap:wrap;gap:8px}
+.pbtn{min-height:44px;padding:0 16px;border:3px solid var(--ink);background:var(--bg);font:600 15px "Pixelify Sans",monospace;box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.pbtn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.pbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.pbtn.tq{background:var(--tq);color:#fff;border-color:#111;box-shadow:3px 3px 0 #111}
+.coins{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;font:700 16px "Pixelify Sans",monospace;background:#111;color:#f6f0e4;border:3px solid #111}
+.coins i{width:16px;height:16px;background:var(--tq);border-radius:50%;box-shadow:inset -3px -3px 0 #0b6f67}
+.stage{position:relative;width:min(1240px,96vw);margin:0 auto;border:4px solid #111;box-shadow:8px 8px 0 #111;background:#111}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}
+.intro{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:2vw;padding:clamp(16px,3vw,44px);background:#efe6d6ee;color:#141113}
+.intro img{width:100%;max-height:100%;object-fit:contain;image-rendering:auto}
+.intro h1{font:700 clamp(34px,5.4vw,72px)/.95 "Pixelify Sans",monospace;margin:0 0 10px}
+.intro h1 small{display:block;font-size:.42em;color:#0b7d73;margin-top:10px}
+.intro p{margin:0 0 14px;max-width:46ch;font-size:clamp(14px,1.4vw,17px)}
+.intro .keys{font:500 14px "Pixelify Sans",monospace;color:#5f584d}
+.intro .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.intro .pbtn{--ink:#141113;--bg:#efe6d6;color:#141113}
+.intro .pbtn.tq{color:#fff}
+.hint{width:min(1240px,96vw);margin:14px auto 0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;font:500 14px "Pixelify Sans",monospace;color:var(--mute)}
+.pad{display:none;width:min(1240px,96vw);margin:16px auto 0;justify-content:space-between;gap:10px;user-select:none;-webkit-user-select:none}
+.pad div{display:flex;gap:10px}
+.pad button{min-width:64px;min-height:64px;border:3px solid var(--ink);background:var(--bg);font:700 22px "Pixelify Sans",monospace;box-shadow:3px 3px 0 var(--ink);touch-action:none}
+.pad button.on{background:var(--tq);color:#fff}
+.pad #tEnter[disabled]{opacity:.35}
+@media (hover:none),(max-width:760px){.pad{display:flex}}
+.note{text-align:center;font-size:13px;color:var(--mute);margin:22px 16px 30px}
+.modal{position:fixed;inset:0;background:#0d0c10b3;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.on{display:flex}
+.win{position:relative;background:var(--card);color:#141113;border:4px solid #111;box-shadow:8px 8px 0 #111;width:min(980px,100%);max-height:calc(100svh - 32px);overflow:auto;padding:clamp(20px,3vw,36px)}
+.win .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.kick{font:600 14px "Pixelify Sans",monospace;color:#0b7d73;margin:0 0 6px}
+.win h2{font:700 clamp(30px,4vw,48px)/1 "Pixelify Sans",monospace;margin:0;text-wrap:balance}
+.deck{font:500 clamp(18px,2vw,22px)/1.3 "Pixelify Sans",monospace;margin:12px 0 0;color:#3b352d;max-width:40ch}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;margin-top:22px;align-items:start}
+.body{margin:0 0 12px;max-width:62ch}
+.tags{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+.tags li{font:500 13px "Pixelify Sans",monospace;padding:3px 9px;border:2px solid #141113;background:#fff}
+.shots{display:grid;gap:12px}
+.shots button{display:block;padding:0;border:3px solid #111;background:#111;cursor:zoom-in}
+.shots img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
+.shots .tall img{object-fit:contain;background:#e9e2d4}
+.fact{margin-top:14px;padding:10px 12px;border:2px dashed #14a396;font-size:14px;color:#3b352d}
+.fact b{font-family:"Pixelify Sans",monospace;color:#0b7d73}
+.nav{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:24px;border-top:3px solid #141113;padding-top:16px}
+.win .pbtn{--ink:#141113;--bg:#f6f0e4;color:#141113}
+.x{flex:none;min-width:44px}
+.list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+.list button{display:block;text-align:left;padding:0;border:3px solid #111;background:#fff;box-shadow:4px 4px 0 #111}
+.list button:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #111}
+.list img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-bottom:3px solid #111}
+.list span{display:block;padding:8px 10px 10px;font:700 17px/1.15 "Pixelify Sans",monospace}
+.list small{display:block;font:400 13px Jost,sans-serif;color:#5f584d;margin-top:3px}
+.contact{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}
+.contact a{color:#141113;font:600 clamp(17px,2vw,22px) "Pixelify Sans",monospace;overflow-wrap:anywhere;text-decoration-color:#14a396;text-underline-offset:4px}
+.contact small{display:block;font-size:13px;color:#5f584d}
+.lb{position:fixed;inset:0;background:#0b0b0bf0;display:none;align-items:center;justify-content:center;z-index:40;padding:58px 16px 16px;cursor:zoom-out}
+.lb.on{display:flex}.lb img{max-width:100%;max-height:100%;object-fit:contain}
+.lb .pbtn{position:absolute;top:8px;right:12px;--ink:#111;--bg:#f6f0e4;color:#111}
+.toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-160%);visibility:hidden;max-width:min(520px,92vw);background:#111;color:#f6f0e4;border:3px solid #f6f0e4;box-shadow:4px 4px 0 #14a396;padding:12px 16px;font-size:15px;z-index:30;transition:transform .3s}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+.toast b{display:block;font:700 17px "Pixelify Sans",monospace;color:#5fd8cc}
+@media(max-width:760px){.intro{grid-template-columns:1fr;overflow:auto;align-items:start}.intro img{display:none}.grid2{grid-template-columns:1fr}.list{grid-template-columns:repeat(2,minmax(0,1fr))}.stage{box-shadow:5px 5px 0 #111}}
+@media(max-width:760px){.intro{position:static}.stage:not(.playing) canvas{display:none}}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">KETZER<span>.</span></div>
+  <div class="bar">
+    <span class="coins" id="coins"><i></i><span id="cc">0/9</span></span>
+    <button class="pbtn" id="bList"></button>
+    <button class="pbtn" id="bLang"></button>
+  </div>
+</header>
+<div class="stage" id="stage">
+  <canvas id="c" width="768" height="432" aria-label="Game: walk down Kat's street and enter each shop to see a project"></canvas>
+  <div class="intro" id="intro">
+    <img src="img/kat-hd.png" alt="Kat as a pixel character with turquoise headphones and overalls">
+    <div>
+      <h1 id="iT"></h1>
+      <p id="iP"></p>
+      <p class="keys" id="iK"></p>
+      <div class="row"><button class="pbtn tq" id="bPlay"></button><button class="pbtn" id="bSkip"></button></div>
+    </div>
+  </div>
+</div>
+<div class="hint"><span id="h1"></span><span id="h2"></span></div>
+<div class="pad" aria-hidden="true"><div><button data-k="left">◀</button><button data-k="right">▶</button></div><div><button data-k="jump">▲</button><button id="tEnter" data-k="enter">E</button></div></div>
+<p class="note" id="note"></p>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="win" id="win"></div></div>
+<div class="lb" id="lb"><img alt=""><button class="pbtn" id="lbx">✕</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+{
+const $=s=>document.querySelector(s);
+let L='en';try{L=localStorage.getItem('kg-lang')||'en'}catch(e){}
+let got=new Set();try{got=new Set(JSON.parse(localStorage.getItem('kg-coins')||'[]'))}catch(e){}
+const tr=o=>o==null?'':typeof o==='string'?o:o[L];
+/* ---------- content ---------- */
+const P={
+jarritos:{img:'jarritos',img2:'jarritos2',n:'Sobremesa × Jarritos',y:'2026',k:{en:'Spec campaign for the UK · art direction & copy',es:'Campaña spec para UK · dirección de arte y copy'},d:{en:'English doesn’t have a word for it. We do.',es:'El inglés no tiene palabra para eso. Nosotros sí.'},
+b:{en:'A self-initiated campaign that gives Jarritos a reason to exist in Britain beyond the taco: it hands the country a word for something it already does. Out of home at Canary Wharf, the Tube and the pub, plus packaging, retail, social, film and an activation.',es:'Una campaña propia que le da a Jarritos una razón para existir en Gran Bretaña más allá del taco: le regala al país una palabra para algo que ya hace. Exteriores en Canary Wharf, el metro y el pub, más empaque, punto de venta, redes, film y una activación.'},
+t:{en:['Concept','Art direction','Copy','OOH','Packaging','Social'],es:['Concepto','Dirección de arte','Copy','Exteriores','Empaque','Redes']},s:{en:'Concept, art direction, copy and design: all mine. Not commissioned by or affiliated with Jarritos.',es:'Concepto, dirección de arte, copy y diseño: todo mío. No es un encargo de Jarritos ni está afiliado a la marca.'}},
+tawa:{img:'tawa',img2:'tawa2',tall2:1,n:'Tawa Tlan Salsas',y:'2024',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A salsa brand that had to look made by hand, because it is.',es:'Una marca de salsas que tenía que verse hecha a mano, porque lo es.'},
+b:{en:'A hand-drawn chile stroke, a greca pattern and a circular seal carry the whole identity across six touchpoints: jars, bottles, bag, shop sign, apron and T-shirt. Everything had to survive a cheap print run and still feel like a family recipe.',es:'Un trazo de chile dibujado a mano, una greca y un sello circular sostienen toda la identidad en seis puntos de contacto: frascos, botellas, bolsa, letrero, mandil y playera. Todo tenía que aguantar una impresión barata y seguir sintiéndose receta de familia.'},
+t:{en:['Logo & seal','Greca pattern','Packaging','Signage','Merch'],es:['Logo y sello','Greca','Empaque','Letrero','Merch']},s:{en:'It began as a pencil sketch, and the system obeys a one-ink rule.',es:'Empezó como boceto a lápiz, y el sistema obedece la regla de una sola tinta.'}},
+chiq:{img:'chiq',img2:'chiq2',tall2:1,n:'Chiquitita Repostería',y:'2021',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A small-batch bakery, designed end to end by one person.',es:'Una repostería de lotes pequeños, diseñada de punta a punta por una sola persona.'},
+b:{en:'Logo system, colour, typography and packaging for a handmade pastry shop, plus a kit of templates the owners could run with on their own. Sweet without being saccharine.',es:'Sistema de logo, color, tipografía y empaque para una repostería artesanal, más un kit de plantillas para que las dueñas pudieran seguir solas. Dulce sin empalagar.'},
+t:{en:['Logo system','Packaging','Templates'],es:['Sistema de logo','Empaque','Plantillas']},s:{en:'Years later they still make on-brand material without me. That was the point.',es:'Años después siguen produciendo material on-brand sin mí. Esa era la idea.'}},
+cosm:{img:'cosm',img2:'cosm2',n:'La Cosmetiquería',y:'2026',k:{en:'Rebrand & design system',es:'Rebranding y design system'},d:{en:'A Guadalajara cosmetics brand, rebuilt around the Flor de Mayo.',es:'Una marca de cosmética de Guadalajara, reconstruida alrededor de la Flor de Mayo.'},
+b:{en:'New identity, packaging, web and tokens, so every product on the shelf speaks the same language and the next one practically designs itself.',es:'Identidad nueva, empaque, web y tokens, para que cada producto en el anaquel hable el mismo idioma y el siguiente casi se diseñe solo.'},
+t:{en:['Identity','Packaging','Web','Design tokens'],es:['Identidad','Empaque','Web','Tokens']},s:{en:'The case study opens with the old website, so you can see where it started.',es:'El case study arranca con el sitio anterior, para que se vea de dónde partió.'}},
+rkt:{img:'rkt',img2:'rkt2',tall2:1,n:'RKT Reketefácil',y:'2022–2024',k:{en:'Brand, mascot & app launch · Raxa Global',es:'Marca, mascota y lanzamiento de app · Raxa Global'},d:{en:'The friendly way to pay off your phone.',es:'La forma amable de terminar de pagar tu celular.'},
+b:{en:'As marketing director at Raxa Global I designed RKT’s identity and its mascot, then launched the payments app with a campaign on social media and in stores. After launch, delinquency fell from 45% to 20%: one customer in two behind on payments became one in five.',es:'Como directora de marketing en Raxa Global diseñé la identidad de RKT y su mascota, y lancé la app de pagos con una campaña en redes y en tiendas. Después del lanzamiento, la morosidad bajó del 45% al 20%: de uno de cada dos clientes atrasados a uno de cada cinco.'},
+t:{en:['Identity','Mascot','App UX/UI','Launch campaign'],es:['Identidad','Mascota','UX/UI de app','Campaña de lanzamiento']},s:{en:'The mascot is called Reke, and she outlived my time there. She’s still in use.',es:'La mascota se llama Reke, y sobrevivió a mi salida. Se sigue usando.'}},
+alph:{img:'alph',img2:'alph2',n:'Alpheka Human Health',y:'2026',k:{en:'Brand identity & patient app (iOS)',es:'Identidad de marca y app para pacientes (iOS)'},d:{en:'An app that lowers anxiety, not information.',es:'Una app que baja la ansiedad, no la información.'},
+b:{en:'A full redesign of the patient app for a private hospital group, and the identity around it: signage, stationery, uniforms. The goal was that someone with an appointment tomorrow understands what to do in five seconds, with one thumb. Sixteen high-fidelity screens, a condensed design system and WCAG 2.2 AA from the first decision.',es:'Rediseño completo de la app para pacientes de un grupo hospitalario privado, y la identidad alrededor: señalética, papelería, uniformes. La meta: que alguien con cita mañana entienda qué hacer en cinco segundos y con un pulgar. Dieciséis pantallas en alta fidelidad, un design system condensado y WCAG 2.2 AA desde la primera decisión.'},
+t:{en:['Identity','Signage','App UX/UI','Accessibility'],es:['Identidad','Señalética','UX/UI de app','Accesibilidad']},s:{en:'Every type size, colour and tap target was checked against the patients the hospital actually has: people between 20 and 80.',es:'Cada tamaño de letra, color y área táctil se revisó contra los pacientes reales del hospital: gente de 20 a 80 años.'}},
+meson:{img:'meson',img2:'meson2',n:'Mesón del Alférez',y:'2026',k:{en:'Product design · Android guest app',es:'Diseño de producto · app Android para huéspedes'},d:{en:'A colonial inn, in your pocket.',es:'Una posada colonial, en tu bolsillo.'},
+b:{en:'A guest app for two historic boutique hotels: express booking shaped by each house, in-stay services and a concierge. The brief was to digitise the stay without losing the warmth, elegance and mystique of the place.',es:'Una app para huéspedes de dos hoteles boutique históricos: reserva exprés según cada casa, servicios durante la estancia y concierge. El reto: digitalizar la estancia sin perder la calidez, la elegancia y el misterio del lugar.'},
+t:{en:['UX','UI','Android'],es:['UX','UI','Android']},s:{en:'The hotels are in Xalapa and Coatepec, and the app is built for international travellers.',es:'Los hoteles están en Xalapa y Coatepec, y la app está pensada para viajeros internacionales.'}},
+incl:{img:'incl',img2:'incl2',tall2:1,n:{en:'Included, but not protected',es:'Incluidas, pero no protegidas'},y:'2026',k:{en:'Data visualisation · campaign concept',es:'Visualización de datos · concepto de campaña'},d:{en:'Access was step one. Protection is the gap.',es:'El acceso fue el primer paso. La protección es la brecha.'},
+b:{en:'A self-initiated launch campaign concept on the gender gap in financial inclusion in Mexico: a long-form infographic, a special report, a factsheet, an event kit, a landing page with a data explorer, plus email and social.',es:'Un concepto propio de campaña de lanzamiento sobre la brecha de género en la inclusión financiera en México: infografía larga, reporte especial, factsheet, kit de evento, landing con explorador de datos, email y redes.'},
+t:{en:['Infographic','Report','Landing page','Social'],es:['Infografía','Reporte','Landing','Redes']},s:{en:'Researched with Claude, assets drawn in Illustrator, assembled in Figma.',es:'Investigado con Claude, assets en Illustrator, armado en Figma.'}},
+qm:{n:'Quarter Mile',y:'2025–',k:{en:'Lead Designer · marketing agency, Texas',es:'Lead Designer · agencia de marketing, Texas'},d:{en:'Full time, remote, and everything at once.',es:'Tiempo completo, remoto, y todo a la vez.'},
+b:{en:'Editorial print, large format, email, branding and social for a US marketing agency. And LED channel letters, which is a sentence I never expected to write in a portfolio.',es:'Editorial impreso, gran formato, email, branding y redes para una agencia de marketing en EE. UU. Y letras de canal LED, una frase que nunca pensé escribir en un portafolio.'},
+t:{en:['Print','Large format','Email','Social','Signage'],es:['Impreso','Gran formato','Email','Redes','Letreros']},s:{en:'I’m also the bridge between design and the sales team.',es:'También soy el puente entre diseño y el equipo de ventas.'}}};
+const BRIEF=[['boladeoro','Bola de Oro',{en:'Email marketing for a fifty-year-old coffee roaster',es:'Email marketing para una tostadora de café con cincuenta años'}],['brunch','Mr. Brunch',{en:'Social campaign: one grid, one yellow, zero exceptions',es:'Campaña de redes: una retícula, un amarillo, cero excepciones'}],['miprecio','Mi Precio',{en:'Logo and web app so makers charge what their work is worth',es:'Logo y web app para cobrar lo que vale tu trabajo'}],['windtree','Wind Tree Plaza',{en:'Brand identity: a grove of turbines for a high-end plaza',es:'Identidad: un bosque de turbinas para una plaza de alto nivel'}],['softwitch','Soft Witch Deck',{en:'Mobile app UX/UI in two skins, day and night',es:'UX/UI de app móvil con dos pieles, día y noche'}],['loli','Loli in the Sky',{en:'Own e-commerce concept: walk on clouds, stay sweet',es:'Concepto propio de e-commerce: camina en las nubes'}]];
+const UI={list:{en:'Skip to the work',es:'Ver sin jugar'},lang:{en:'Español',es:'English'},play:{en:'Press start',es:'Empezar'},
+iT:{en:'KETZER<small>From Mexico to London · level 1</small>',es:'KETZER<small>De México a Londres · nivel 1</small>'},
+iP:{en:'A playable portfolio by Kat González, senior graphic designer and art director. Walk down my street: every shop is a project. Collect the nine seals on the way.',es:'Un portafolio jugable de Kat González, diseñadora gráfica senior y directora de arte. Camina por mi calle: cada local es un proyecto. Junta los nueve sellos en el camino.'},
+iK:{en:'← → walk · Space jump · E enter · or click any shop',es:'← → caminar · Espacio saltar · E entrar · o haz clic en un local'},
+h1:{en:'← → walk · Space jump · E enter a shop',es:'← → caminar · Espacio saltar · E entrar al local'},h2:{en:'Tip: click a shop and I’ll walk there',es:'Tip: haz clic en un local y camino hacia él'},
+enter:{en:'E  ENTER',es:'E  ENTRAR'},prev:{en:'◀ Previous shop',es:'◀ Local anterior'},next:{en:'Next shop ▶',es:'Siguiente local ▶'},close:{en:'Close',es:'Cerrar'},
+seal:{en:'Seal',es:'Sello'},fact:{en:'Seal fact',es:'Dato del sello'},hidden:{en:'Find this shop’s seal to unlock a behind-the-scenes fact.',es:'Encuentra el sello de este local para ver un dato de detrás de escena.'},
+all:{en:'All nine! A secret door just opened at the end of the street.',es:'¡Los nueve! Se abrió una puerta secreta al final de la calle.'},
+note:{en:'All work © Karla “Kat” González. Spec and concept projects are marked as such.',es:'Todo el trabajo © Karla “Kat” González. Los proyectos spec y conceptuales están marcados como tales.'},
+next2:{en:'Next stop: London',es:'Próxima parada: Londres'},nextT:{en:'I’m relocating to the UK. The rest of the street is where I’m headed.',es:'Me estoy mudando a UK. El resto de la calle es hacia donde voy.'}};
+/* ---------- street ---------- */
+const S=[
+{id:'about',kind:'shop',w:240,h:220,wall:'#1fa79b',trim:'#efe2c8',sign:{en:'KAT’S STUDIO',es:'ESTUDIO KAT'},sbg:'#efe2c8',sfg:'#141113',awn:['#141113','#efe2c8'],win:'kat'},
+{id:'tawa',kind:'stall',w:230,h:170},
+{id:'chiq',kind:'shop',w:250,h:205,wall:'#f39bb7',trim:'#fff2f5',sign:'CHIQUITITA',sbg:'#fff',sfg:'#d92d68',awn:['#d92d68','#fff'],win:'chiq',logo:'logo-chiq',lbg:'#ffffff',pad:2,ps:2},
+{id:'cosm',kind:'shop',w:260,h:250,wall:'#8c1d3b',trim:'#e9c46a',sign:'LA COSMETIQUERÍA',sbg:'#e9c46a',sfg:'#5a0f24',awn:['#5a0f24','#f3e1c8'],win:'cosm2',logo:'logo-cosm',lbg:'#f6ecdd',pad:3},
+{id:'editorial',kind:'kiosk',w:180,h:160},
+{id:'rkt',kind:'shop',w:260,h:215,wall:'#6c3fa0',trim:'#7ac143',sign:'RKT',sbg:'#7ac143',sfg:'#fff',win:'rkt',glass:1,logo:'logo-rkt',lbg:'#ffffff',pad:2},
+{id:'alph',kind:'shop',w:260,h:240,wall:'#f3eee8',trim:'#4b2e4f',sign:'ALPHEKA',sbg:'#4b2e4f',sfg:'#fff',win:'alph',cross:1,logo:'logo-alph',lbg:'#3f2638',pad:2,ps:2},
+{id:'meson',kind:'meson',w:310,h:235},
+{id:'incl',kind:'billboard',w:230,h:260},
+{id:'qm',kind:'neon',w:270,h:225},
+{id:'brief',kind:'gallery',w:310,h:215},
+{id:'sign',kind:'signpost',w:170,h:210},
+{id:'jarritos',kind:'station',w:330,h:250},
+{id:'contact',kind:'phone',w:110,h:196},
+{id:'bonus',kind:'bonusdoor',w:130,h:176}];
+const GY=356,FEET=362,VW=768,VH=432;let xx=300;for(const o of S){o.x=xx;xx+=o.w+(o.kind==='signpost'?120:72)}
+const WORLD=xx+260,LON=S.find(o=>o.id==='sign').x+40;
+const FEAT=['tawa','chiq','cosm','rkt','alph','meson','incl','qm','jarritos'];
+const coins=FEAT.map((id,i)=>{const o=S.find(s=>s.id===id);const gx=id==='jarritos'?o.x+o.w+36:id==='qm'?o.x+o.w+50:o.x+o.w+36;return{id,x:gx,y:GY-150-(i%3)*16}});
+const TOTAL=coins.length;
+/* ---------- assets ---------- */
+const IM={};const need=['logo-chiq','logo-cosm','logo-tawa','logo-rkt','logo-alph','kat','jarritos2','chiq','cosm2','rkt','alph','meson','incl','lider','estridente',...BRIEF.map(b=>b[0])];
+const PIX={};
+function pixel(name,w,h){const k=name+w+'x'+h;if(PIX[k])return PIX[k];const im=IM[name];if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=Math.max(4,Math.round(w/3));c.height=Math.max(4,Math.round(h/3));const g=c.getContext('2d');g.imageSmoothingQuality='high';
+const r=Math.max(c.width/im.naturalWidth,c.height/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;g.drawImage(im,(c.width-dw)/2,(c.height-dh)/2,dw,dh);return PIX[k]=c}
+for(const n of need){const i=new Image();i.src=n==='kat'||n.startsWith('logo-')?'img/'+n+'.png':'img/'+n+'.jpg';IM[n]=i}
+function pixelLogo(name,w,h,bg,ps,pad){const k='L'+name+w+'x'+h+ps;if(PIX[k])return PIX[k];const im=IM[name];if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=Math.round(w/ps);c.height=Math.round(h/ps);const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';const r=Math.min((c.width-pad*2)/im.naturalWidth,(c.height-pad*2)/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;g.drawImage(im,(c.width-dw)/2,(c.height-dh)/2,dw,dh);return PIX[k]=c}
+function logoWin(x,y,w,h,name,bg,ps=3,pad=3){box(x,y,w,h,bg);const p=pixelLogo(name,w,h,bg,ps,pad);if(p)X.drawImage(p,Math.round(x-cam),Math.round(y),w,h);R(x+6,y+6,4,h-12,'#ffffff4d');R(x+14,y+6,2,h-12,'#ffffff33');R(x,y+h,w,4,'#00000033')}
+/* ---------- canvas helpers ---------- */
+const C=$('#c'),X=C.getContext('2d');X.imageSmoothingEnabled=false;
+let cam=0;
+const R=(x,y,w,h,c)=>{X.fillStyle=c;X.fillRect(Math.round(x-cam),Math.round(y),Math.round(w),Math.round(h))};
+const box=(x,y,w,h,c,o='#141113')=>{R(x-2,y-2,w+4,h+4,o);R(x,y,w,h,c)};
+const T=(s,x,y,size,c,al='center',font='Silkscreen')=>{X.font=`${size}px ${font}, monospace`;X.fillStyle=c;X.textAlign=al;X.textBaseline='middle';X.fillText(s,Math.round(x-cam),Math.round(y))};
+const fitT=(s,x,y,w,size,c)=>{X.font=`${size}px Silkscreen, monospace`;while(X.measureText(s).width>w&&size>8){size--;X.font=`${size}px Silkscreen, monospace`}T(s,x,y,size,c)};
+const img=(name,x,y,w,h)=>{const p=pixel(name,w,h);if(p)X.drawImage(p,Math.round(x-cam),Math.round(y),w,h);else R(x,y,w,h,'#9ad')};
+function awning(x,y,w,cols){const n=Math.ceil(w/16);for(let i=0;i<n;i++){const sw=Math.min(16,w-i*16);R(x+i*16,y,sw,22,cols[i%2]);R(x+i*16+2,y+22,sw-4,4,cols[i%2]);R(x+i*16+4,y+26,sw-8,3,cols[i%2])}R(x,y-3,w,3,'#141113')}
+function door(x,y,w,h,c='#4a2f24'){box(x,y,w,h,c);R(x+4,y+4,w-8,h/2-6,'#00000022');R(x+w-10,y+h/2,4,4,'#e9c46a')}
+function windowImg(x,y,w,h,name,glass){box(x,y,w,h,'#bfe3df');img(name,x,y,w,h);if(glass){R(x+8,y+6,4,h-12,'#ffffff55');R(x+16,y+6,2,h-12,'#ffffff40')}R(x,y+h,w,4,'#00000033')}
+/* ---------- draw kinds ---------- */
+function drawShop(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,o.wall);R(o.x,y,o.w,12,o.trim);R(o.x,y+12,o.w,3,'#00000026');
+box(o.x+18,y+24,o.w-36,30,o.sbg);fitT(tr(o.sign),o.x+o.w/2,y+40,o.w-50,16,o.sfg);
+if(o.awn)awning(o.x+8,y+68,o.w-16,o.awn);
+const wy=y+(o.awn?110:76),dw=50,dh=GY-wy-4;const ww=o.w-18-dw-18-18;
+if(o.win==='kat'){const wx=o.x+18,wh=dh-6;box(wx,wy,ww,wh,'#bfe3df');R(wx+ww/2-1,wy,2,14,'#141113');box(wx+ww/2-40,wy+14,80,20,'#d92d68');T(L=='en'?'OPEN':'ABIERTO',wx+ww/2,wy+24,11,'#fff');box(wx+18,wy+wh-58,64,40,'#141113');R(wx+22,wy+wh-54,56,32,'#14a396');R(wx+26,wy+wh-50,20,4,'#f6f0e4');R(wx+26,wy+wh-42,34,4,'#f6f0e4');R(wx+44,wy+wh-18,12,10,'#141113');R(wx+8,wy+wh-8,ww-16,8,'#8a5a3b');box(wx+ww-46,wy+wh-44,22,30,'#c2412d');R(wx+ww-48,wy+wh-60,26,16,'#3d8a4f');R(wx+8,wy+8,4,wh-20,'#ffffff55')}
+else if(o.logo)logoWin(o.x+18,wy,ww,dh-6,o.logo,o.lbg,o.ps||3,o.pad||3);else windowImg(o.x+18,wy,ww,dh-6,o.win,o.glass);
+door(o.x+o.w-18-dw,GY-Math.min(dh,92),dw,Math.min(dh,92),o.glass?'#2b1846':o.id==='alph'?'#4b2e4f':'#4a2f24');
+if(o.cross){const cx=o.x+o.w-46,cy=y+80;R(cx-6,cy-18,12,36,'#4b2e4f');R(cx-18,cy-6,36,12,'#4b2e4f');R(cx-4,cy-4,8,8,'#9bc9a8')}
+if(o.flower){const cx=o.x+o.w-44,cy=wy-22;for(let k=0;k<5;k++){const a=k*1.2566-1.57;R(cx+Math.cos(a)*9-5,cy+Math.sin(a)*9-5,10,10,'#f3e1c8')}R(cx-4,cy-4,8,8,'#e9c46a')}
+R(o.x-4,GY-6,o.w+8,6,'#00000030')}
+function drawStall(o,t){const y=GY-o.h;R(o.x+10,y+30,6,o.h-30,'#5b3a29');R(o.x+o.w-16,y+30,6,o.h-30,'#5b3a29');
+const sz=84,sx=o.x+o.w/2-sz/2,sy=y-56;R(o.x+o.w/2-1,sy+sz,2,12,'#141113');logoWin(sx,sy,sz,sz,'logo-tawa','#ffffff',3,1);
+awning(o.x,y+34,o.w,['#c2412d','#f2b134']);
+box(o.x+6,GY-64,o.w-12,64,'#8a5a3b');for(let i=0;i<o.w-12;i+=24){R(o.x+6+i,GY-64,2,64,'#6e4630')}
+for(let i=0;i<o.w-20;i+=20){R(o.x+10+i,GY-30,8,4,'#f2b134');R(o.x+14+i,GY-34,4,4,'#f2b134');R(o.x+18+i,GY-26,6,4,'#f2b134')}
+for(let i=0;i<7;i++){const jx=o.x+22+i*28,jy=GY-88;box(jx,jy,18,22,'#c2412d');R(jx,jy-6,18,6,'#f2b134');R(jx+3,jy+7,12,8,'#fff6e6')}}
+function drawKiosk(o,t){const y=GY-o.h;box(o.x,y+20,o.w,o.h-20,'#2f6b4f');R(o.x-10,y+8,o.w+20,16,'#c2412d');R(o.x-10,y+4,o.w+20,4,'#141113');
+box(o.x+14,y+30,o.w-28,24,'#f6f0e4');fitT(L=='en'?'MAGAZINES':'REVISTAS',o.x+o.w/2,y+42,o.w-40,14,'#141113');
+const cw=46,ch=62,gy=y+66;img('lider',o.x+12,gy,cw,ch);img('estridente',o.x+12+cw+8,gy,cw,ch);box(o.x+12+2*(cw+8),gy,cw,ch,'#f2b134');T('MEXI',o.x+12+2*(cw+8)+cw/2,gy+20,10,'#141113');T('JUKU',o.x+12+2*(cw+8)+cw/2,gy+34,10,'#d92d68');
+box(o.x+10,GY-30,o.w-20,30,'#24543e')}
+function drawMeson(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#e8b43a');R(o.x,GY-70,o.w,70,'#b8322a');
+for(let r=0;r<4;r++){R(o.x-12+r*3,y-24+r*6,o.w+24-r*6,6,r%2?'#8c3b22':'#a8492b')}R(o.x-12,y-28,o.w+24,4,'#141113');
+const ax=o.x+o.w-110,aw=72,ah=118;box(ax,GY-ah,aw,ah,'#1f4f8a');X.fillStyle='#141113';X.beginPath();X.arc(Math.round(ax+aw/2-cam),GY-ah,aw/2+2,Math.PI,0);X.fill();X.fillStyle='#1f4f8a';X.beginPath();X.arc(Math.round(ax+aw/2-cam),GY-ah,aw/2,Math.PI,0);X.fill();R(ax+aw/2-1,GY-ah,2,ah,'#143a66');
+windowImg(o.x+22,y+60,o.w-160,110,'meson');R(o.x+16,y+56,o.w-148,4,'#141113');
+R(o.x+o.w/2-40,y+22,80,3,'#141113');box(o.x+o.w/2-74,y+28,148,22,'#f6f0e4');fitT('MESÓN DEL ALFÉREZ',o.x+o.w/2,y+39,136,11,'#8c1d1d');
+const lx=ax-22,ly=GY-ah-10;R(lx,ly-14,2,14,'#141113');box(lx-6,ly,14,18,'#f2b134');if(Math.sin(t/300)>-.6)R(lx-2,ly+4,6,10,'#fff3b0')}
+function drawBill(o,t){const y=GY-o.h;R(o.x+40,y+150,8,o.h-150,'#3b3b3b');R(o.x+o.w-48,y+150,8,o.h-150,'#3b3b3b');box(o.x,y,o.w,150,'#5b2a86');img('incl',o.x+6,y+6,o.w-12,138);
+for(let i=0;i<4;i++){R(o.x+20+i*60,y-10,10,6,'#141113');R(o.x+22+i*60,y-4,6,4,'#fff3b0')}R(o.x+20,y+156,o.w-40,4,'#3b3b3b')}
+function drawNeon(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#d8b98a');R(o.x-6,y-8,o.w+12,10,'#b8956a');R(o.x,y+o.h-80,o.w,4,'#b8956a');
+const on=!(Math.floor(t/90)%23===0||Math.floor(t/70)%31===0);X.save();if(on){X.shadowColor='#36e0d0';X.shadowBlur=18}T('LED',o.x+o.w/2,y+62,62,on?'#7ff5ea':'#5f8f8a');X.restore();
+box(o.x+30,y+108,o.w-60,24,'#141113');fitT('QUARTER MILE · TEXAS',o.x+o.w/2,y+120,o.w-76,12,'#f6f0e4');
+door(o.x+o.w/2-26,GY-86,52,86,'#6b4a33');const cx=o.x+o.w+20;R(cx,GY-70,12,70,'#3d8a4f');R(cx-12,GY-50,8,24,'#3d8a4f');R(cx-12,GY-30,20,6,'#3d8a4f');R(cx+16,GY-60,8,22,'#3d8a4f');R(cx+10,GY-42,14,6,'#3d8a4f')}
+function drawGallery(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#fbfaf7');R(o.x,y,o.w,10,'#141113');box(o.x+20,y+20,o.w-40,26,'#141113');fitT(L=='en'?'GALLERY · IN BRIEF':'GALERÍA · EN BREVE',o.x+o.w/2,y+33,o.w-60,13,'#fbfaf7');
+BRIEF.forEach((b,i)=>{const fx=o.x+22+(i%3)*((o.w-44)/3),fy=y+60+Math.floor(i/3)*64;box(fx+4,fy,(o.w-44)/3-12,50,'#e9c46a');img(b[0],fx+8,fy+4,(o.w-44)/3-20,42)});
+door(o.x+o.w/2-24,GY-28,48,28,'#141113')}
+function drawSign(o,t){const y=GY-o.h;R(o.x+o.w/2-4,y+40,8,o.h-40,'#3b3b3b');box(o.x,y,o.w,76,'#1f4f8a');R(o.x+4,y+4,o.w-8,68,'#1f4f8a');X.strokeStyle='#fff';X.lineWidth=2;X.strokeRect(Math.round(o.x+6-cam),y+6,o.w-12,64);
+fitT(L=='en'?'NEXT STOP':'PRÓXIMA PARADA',o.x+o.w/2,y+26,o.w-24,13,'#fff');fitT(L=='en'?'LONDON  ✈':'LONDRES  ✈',o.x+o.w/2,y+50,o.w-24,18,'#f2b134')}
+function drawStation(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#8a3f2f');for(let r=0;r<o.h;r+=10)for(let c=(r/10)%2*12;c<o.w;c+=24)R(o.x+c,y+r,2,10,'#6e2f23');for(let r=0;r<o.h;r+=10)R(o.x,y+r,o.w,2,'#6e2f23');
+box(o.x+16,y+14,o.w-32,30,'#1c2a5c');fitT('STATION',o.x+o.w/2,y+29,o.w-60,16,'#fff');
+box(o.x+20,y+60,170,120,'#0f6b3a');img('jarritos2',o.x+26,y+66,158,96);fitT('SOBREMESA (n.)',o.x+105,y+172,150,10,'#fbe9c8');
+const sx=o.x+210,sw=100;box(sx,GY-110,sw,110,'#141113');for(let i=0;i<6;i++)R(sx+6,GY-100+i*16,sw-12,3,'#2c2c2c');R(sx-6,GY-120,4,120,'#c9c9c9');R(sx+sw+2,GY-120,4,120,'#c9c9c9')}
+function drawPhone(o,t){const y=GY-o.h;box(o.x,y+16,o.w,o.h-16,'#c8102e');X.fillStyle='#141113';X.beginPath();X.arc(Math.round(o.x+o.w/2-cam),y+18,o.w/2+2,Math.PI,0);X.fill();X.fillStyle='#c8102e';X.beginPath();X.arc(Math.round(o.x+o.w/2-cam),y+18,o.w/2,Math.PI,0);X.fill();
+box(o.x+10,y+24,o.w-20,16,'#141113');fitT(L=='en'?'CONTACT':'CONTACTO',o.x+o.w/2,y+32,o.w-26,11,'#fff');
+for(let r=0;r<4;r++)for(let c=0;c<3;c++)R(o.x+16+c*27,y+52+r*28,22,22,'#f6f0e4');R(o.x+o.w-18,GY-80,4,12,'#e9c46a')}
+function drawBonus(o,t){if(got.size<TOTAL){T('?',o.x+o.w/2,GY-60,30,'#00000030');return}const y=GY-o.h;const cols=['#14a396','#efe2c8','#141113'];for(let i=0;i<9;i++)R(o.x+i*4,y+i*4,o.w-i*8,o.h-i*4,cols[i%3]);
+box(o.x+18,y-24,o.w-36,20,'#141113');fitT('MOODBOARD',o.x+o.w/2,y-14,o.w-46,11,'#7ff5ea');for(let i=0;i<6;i++){const a=t/400+i;R(o.x+o.w/2+Math.cos(a)*80-2,y+40+Math.sin(a*1.3)*50,4,4,'#fff3b0')}}
+const DRAW={shop:drawShop,stall:drawStall,kiosk:drawKiosk,meson:drawMeson,billboard:drawBill,neon:drawNeon,gallery:drawGallery,signpost:drawSign,station:drawStation,phone:drawPhone,bonusdoor:drawBonus};
+/* ---------- background ---------- */
+const lerp=(a,b,k)=>a+(b-a)*k;const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const mix=(a,b,k)=>{const A=hex(a),B=hex(b);return`rgb(${A.map((v,i)=>Math.round(lerp(v,B[i],k))).join(',')})`};
+const clouds=Array.from({length:14},(_,i)=>({x:i*330+((i*97)%140),y:30+((i*53)%90),w:60+((i*37)%70)}));
+const rain=Array.from({length:90},(_,i)=>({x:(i*73)%VW,y:(i*131)%VH}));
+function bg(t){const k=Math.max(0,Math.min(1,(cam+VW*.6-LON)/500));
+const g=X.createLinearGradient(0,0,0,GY);g.addColorStop(0,mix('#5fc9bd','#7b8796',k));g.addColorStop(1,mix('#f3e3c6','#c9ced3',k));X.fillStyle=g;X.fillRect(0,0,VW,GY);
+if(k<1){X.globalAlpha=1-k;const vx=-cam*.08;X.fillStyle='#8fb7b0';X.beginPath();X.moveTo(vx+80,GY-90);X.lineTo(vx+330,GY-250);X.lineTo(vx+360,GY-244);X.lineTo(vx+620,GY-90);X.fill();X.fillStyle='#f6f0e4';X.beginPath();X.moveTo(vx+290,GY-226);X.lineTo(vx+330,GY-250);X.lineTo(vx+360,GY-244);X.lineTo(vx+392,GY-222);X.lineTo(vx+350,GY-214);X.fill();X.globalAlpha=1}
+if(k>0){X.globalAlpha=k;X.fillStyle='#5f6a78';const ox=-((cam*.3)%600);for(let rep=0;rep<3;rep++){const b=ox+rep*600;[[0,120,60],[70,90,40],[120,160,30],[160,70,70],[240,200,26],[280,110,60],[350,140,40],[400,95,80],[490,180,34],[530,120,50]].forEach(([x,h,w])=>X.fillRect(b+x,GY-40-h,w,h+40));X.fillRect(b+246,GY-260,14,20)}X.globalAlpha=1}
+X.fillStyle=k>.5?'#e6e8ea':'#fbf6ec';for(const c of clouds){const x=((c.x-cam*.25)%(VW+300)+VW+300)%(VW+300)-150;X.fillRect(Math.round(x),c.y,c.w,14);X.fillRect(Math.round(x+12),c.y-8,c.w-30,10);X.fillRect(Math.round(x+c.w*.4),c.y-14,c.w*.3,8)}
+X.fillStyle=mix('#c8b89a','#8e959d',k);for(let i=-1;i<VW/90+2;i++){const x=i*90-((cam*.55)%90);X.fillRect(Math.round(x),GY-70-((i*31+Math.floor(cam*.55/90)*31)%40+0),70,120)}
+return k}
+function picado(){const end=LON-60;for(let s=0;s<end;s+=300){const x0=s,x1=Math.min(s+300,end);if(x1<cam-10||x0>cam+VW+10)continue;for(let x=x0;x<x1;x+=22){const f=(x-x0)/300,yy=46+Math.sin(f*Math.PI)*22;R(x,yy,22,2,'#141113');const c=['#d92d68','#f2b134','#14a396','#6c3fa0','#7ac143'][Math.floor(x/22)%5];R(x+3,yy+2,16,16,c);R(x+3,yy+18,4,4,c);R(x+11,yy+18,4,4,c);R(x+7,yy+7,3,3,'#ffffff66');R(x+12,yy+10,3,3,'#ffffff66')}}}
+function street(k){R(cam,GY,VW,8,'#141113');for(let x=Math.floor(cam/32)*32;x<cam+VW;x+=32){R(x,GY+8,32,22,((x/32)%2)?mix('#e7d8bb','#b9bcc0',k):mix('#ddcaa8','#aeb2b6',k))}R(cam,GY+30,VW,6,'#5b5b5b');R(cam,GY+36,VW,VH,'#3a3a3e');for(let x=Math.floor(cam/80)*80;x<cam+VW;x+=80)R(x,GY+56,40,4,'#e9c46a');
+}
+function lamps(){for(let x=Math.floor(cam/260)*260+110;x<cam+VW+100;x+=260){R(x,GY-150,6,150,'#141113');R(x-10,GY-166,26,18,'#141113');R(x-6,GY-162,18,10,'#f2d58a')}}
+/* ---------- player ---------- */
+const pl={x:150,y:FEET,vx:0,vy:0,face:1,ground:true,walk:0};let target=null;
+const keys={};let near=null,started=false,paused=false;
+function update(dt){const k=dt/16.67;const left=keys.left,right=keys.right;
+if(target!=null&&(left||right))target=null;
+let dir=(right?1:0)-(left?1:0);if(target!=null){const d=target-pl.x;dir=Math.abs(d)<6?0:Math.sign(d);if(!dir){const o=S.find(o=>Math.abs(o.x+o.w/2-target)<2);target=null;if(o)open(o.id)}}
+pl.vx=lerp(pl.vx,dir*4.6,.25*k);if(dir)pl.face=dir;pl.x=Math.max(40,Math.min(WORLD-40,pl.x+pl.vx*k));
+if(keys.jump&&pl.ground){pl.vy=-15.5;pl.ground=false;keys.jump=false}
+pl.vy+=0.85*k;pl.y+=pl.vy*k;if(pl.y>=FEET){pl.y=FEET;pl.vy=0;pl.ground=true}
+pl.walk+=Math.abs(pl.vx)*k*.12;
+cam=Math.max(0,Math.min(WORLD-VW,pl.x-VW*.42));
+near=S.find(o=>pl.x>o.x-10&&pl.x<o.x+o.w+10&&(o.id!=='bonus'||got.size>=TOTAL))||null;
+const te=$('#tEnter');if(te)te.disabled=!near;
+if(keys.enter){keys.enter=false;if(near)open(near.id)}
+for(const c of coins){if(got.has(c.id))continue;if(Math.abs(pl.x-c.x)<28&&c.y>pl.y-104&&c.y<pl.y){got.add(c.id);try{localStorage.setItem('kg-coins',JSON.stringify([...got]))}catch(e){}hud();
+const p=P[c.id];toast(`<b>${tr(UI.seal)} ${got.size}/${TOTAL} · ${tr(p.n)}</b>${tr(p.s)}${got.size>=TOTAL?'<br><br>'+tr(UI.all):''}`);burst(c.x,c.y)}}
+parts.forEach(p=>{p.x+=p.vx*k;p.y+=p.vy*k;p.vy+=.3*k;p.l-=k});parts=parts.filter(p=>p.l>0);
+if(pl.ground&&Math.abs(pl.vx)>2&&Math.random()<.25*k)parts.push({x:pl.x-pl.face*14,y:FEET-2,vx:-pl.face*Math.random(),vy:-Math.random()*1.4,l:18,c:'#cdbb98',s:4})}
+let parts=[];function burst(x,y){for(let i=0;i<18;i++)parts.push({x,y,vx:Math.cos(i)*3,vy:Math.sin(i*1.7)*3-2,l:30,c:i%2?'#14a396':'#f2b134',s:4})}
+function drawPlayer(t){const k=IM.kat;R(pl.x-26,FEET-2,52,5,'#00000038');if(!k.complete||!k.naturalWidth)return;
+const bob=pl.ground&&Math.abs(pl.vx)>.6?-Math.abs(Math.sin(pl.walk))*4:0,sq=pl.ground?1:1.02;const w=k.width,h=k.height;
+X.save();X.translate(Math.round(pl.x-cam),Math.round(pl.y+bob));X.scale(pl.face,sq);X.drawImage(k,-Math.round(w/2),-h,w,h);X.restore()}
+function drawCoins(t){for(const c of coins){if(got.has(c.id))continue;const y=c.y+Math.sin(t/300+c.x)*4,w=Math.max(2,Math.abs(Math.cos(t/260+c.x))*22);R(c.x-w/2-2,y-13,w+4,26,'#141113');R(c.x-w/2,y-11,w,22,'#14a396');R(c.x-w/2-4,y-9,w+8,18,'#141113');R(c.x-w/2-2,y-7,w+4,14,'#14a396');if(w>12){R(c.x-2,y-8,4,4,'#f6f0e4');R(c.x-6,y-4,12,4,'#f6f0e4');R(c.x-4,y,8,4,'#f6f0e4');R(c.x-6,y+4,4,3,'#f6f0e4');R(c.x+2,y+4,4,3,'#f6f0e4')}R(c.x-w/2+2,y-9,3,5,'#7ff5ea')}}
+function bubble(t){if(!near||paused)return;const s=near.id==='sign'?(L=='en'?'E  READ':'E  LEER'):tr(UI.enter);X.font='13px Silkscreen, monospace';const w=X.measureText(s).width+22,x=pl.x-w/2,y=pl.y-136+Math.sin(t/200)*2;box(x,y,w,24,'#f6f0e4');R(pl.x-4,y+26,8,4,'#141113');T(s,pl.x,y+12,13,'#141113')}
+function frame(t){const dt=Math.min(40,t-(frame.l||t));frame.l=t;if(started&&!paused)update(dt);else cam=Math.max(0,Math.min(WORLD-VW,pl.x-VW*.42));
+X.setTransform(1,0,0,1,0,0);const k=bg(t);picado();lamps();
+for(const o of S){if(o.x+o.w+60<cam||o.x-60>cam+VW)continue;DRAW[o.kind](o,t)}
+street(k);drawCoins(t);for(const p of parts)R(p.x,p.y,p.s,p.s,p.c);drawPlayer(t);bubble(t);
+if(k>.4){X.fillStyle=`rgba(200,215,230,${(k-.4)*.8})`;for(const r of rain){r.y=(r.y+9)%VH;r.x=(r.x-2+VW)%VW;X.fillRect(r.x,r.y,1,8)}}
+requestAnimationFrame(frame)}
+/* ---------- UI ---------- */
+function hud(){$('#cc').textContent=`${got.size}/${TOTAL}`}
+let tt;function toast(h){const t=$('#toast');t.innerHTML=h;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),5200)}
+const order=S.filter(o=>o.id!=='sign'&&(o.id!=='bonus'||got.size>=TOTAL)).map(o=>o.id);
+const shot=(n,tall)=>`<button class="${tall?'tall':''}" data-zoom="${n}"><img src="img/${n}.jpg" alt="" loading="lazy"></button>`;
+function content(id){if(P[id]){const p=P[id];return `<p class="kick">${tr(p.k)} · ${p.y}</p><h2>${tr(p.n)}</h2><p class="deck">${tr(p.d)}</p><div class="grid2"><div><p class="body">${tr(p.b)}</p><ul class="tags">${tr(p.t).map(x=>`<li>${x}</li>`).join('')}</ul>${got.has(id)?`<div class="fact"><b>★ ${tr(UI.fact)}</b><br>${tr(p.s)}</div>`:`<div class="fact">${tr(UI.hidden)}</div>`}</div><div class="shots">${p.img?shot(p.img):''}${p.img2?shot(p.img2,p.tall2):''}</div></div>`}
+if(id==='about')return `<p class="kick">${L=='en'?'Kat’s studio · editor’s letter':'Estudio Kat · carta editorial'}</p><h2>${L=='en'?'Hi, I’m Kat.':'Hola, soy Kat.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Senior graphic designer and art director with ten years across branding, editorial, UX/UI, packaging and paid media. I started out laying out magazines in Mexico and never stopped thinking in spreads. I hold an MA in Editorial Design, I write in two languages, and I use AI as part of the production line, not instead of it.':'Diseñadora gráfica senior y directora de arte con diez años entre branding, editorial, UX/UI, empaque y medios pagados. Empecé formando revistas en México y nunca dejé de pensar en pliegos. Tengo maestría en Diseño Editorial, escribo en dos idiomas y uso la IA como parte de la producción, no en su lugar.'}</p><p class="body">${L=='en'?'Walk east. Every shop on this street is a project, and the street ends where I’m headed.':'Camina hacia la derecha. Cada local de esta calle es un proyecto, y la calle termina hacia donde voy.'}</p></div><div class="shots"><button class="tall" data-zoom="kat-hd" data-png="1"><img src="img/kat-hd.png" alt="Kat, pixel version"></button></div></div>`;
+if(id==='editorial')return `<p class="kick">${L=='en'?'Back issues · editorial design':'Números atrasados · diseño editorial'}</p><h2>${L=='en'?'Before brands, there were magazines.':'Antes de las marcas, hubo revistas.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Líder, Mexijuku and Estridente taught me the grid, the deadline and the cover line. Líder, on politics and business, was rebuilt around a single editorial grid; Estridente is an independent cultural magazine for Xalapa, art-directed from masthead to colophon.':'Líder, Mexijuku y Estridente me enseñaron la retícula, el cierre y la línea de portada. Líder, de política y negocios, se rehízo alrededor de una sola retícula; Estridente es una revista cultural independiente de Xalapa, con dirección de arte del cabezal al colofón.'}</p><ul class="tags"><li>${L=='en'?'Editorial design':'Diseño editorial'}</li><li>${L=='en'?'Art direction':'Dirección de arte'}</li><li>${L=='en'?'MA, Universidad Gestalt':'Maestría, Universidad Gestalt'}</li></ul></div><div class="shots">${shot('estridente')}${shot('lider')}</div></div>`;
+if(id==='brief')return `<p class="kick">${L=='en'?'Gallery · six more, quickly':'Galería · seis más, rápido'}</p><h2>${L=='en'?'In brief':'En breve'}</h2><div class="list">${BRIEF.map(b=>`<button data-zoom="${b[0]}"><img src="img/${b[0]}.jpg" alt="" loading="lazy"><span>${b[1]}<small>${tr(b[2])}</small></span></button>`).join('')}</div>`;
+if(id==='contact')return `<p class="kick">${L=='en'?'The red phone box':'La cabina roja'}</p><h2>${L=='en'?'Let’s make the next level.':'Hagamos el siguiente nivel.'}</h2><p class="deck">${L=='en'?'Based in México, relocating to the UK. Open to remote work, in English and Spanish.':'Desde México, mudándome a UK. Abierta a trabajo remoto, en inglés y español.'}</p><ul class="contact"><li><small>Email</small><a href="mailto:akaiart.design@gmail.com">akaiart.design@gmail.com</a></li><li><small>LinkedIn</small><a href="https://linkedin.com/in/karlakatgonzalez">linkedin.com/in/karlakatgonzalez</a></li><li><small>Behance</small><a href="https://www.behance.net/KarlaKetzer">behance.net/KarlaKetzer</a></li><li><small>Web</small><a href="https://katketzer.github.io">katketzer.github.io</a></li></ul>`;
+if(id==='bonus')return `<p class="kick">${L=='en'?'Secret door · 9/9 seals':'Puerta secreta · 9/9 sellos'}</p><h2>${L=='en'?'You found them all.':'Los encontraste todos.'}</h2><p class="deck">${L=='en'?'Here’s who’s on the moodboard behind every shop.':'Esto es lo que hay en el moodboard detrás de cada local.'}</p><ul class="contact">${[[{en:'Fashion',es:'La moda'},{en:'My first reference, always',es:'Mi primera referencia, siempre'}],['Alexey Brodovitch',{en:'For making white space move',es:'Por hacer que el espacio en blanco se mueva'}],['Fabien Baron',{en:'For type that behaves like a photograph',es:'Por tipografía que se comporta como fotografía'}],['Irma Boom',{en:'For books as objects',es:'Por los libros como objetos'}],['Paula Scher',{en:'For loud, joyful identity',es:'Por identidades ruidosas y felices'}],['Vivienne Westwood',{en:'For the nerve',es:'Por la osadía'}]].map(([a,b])=>`<li><small>${tr(b)}</small><span class="px" style="font-size:20px;font-weight:600">${tr(a)}</span></li>`).join('')}</ul>`;
+return ''}
+function list(){return `<p class="kick">${L=='en'?'No game, just the work':'Sin juego, solo el trabajo'}</p><h2>${L=='en'?'Every shop on the street':'Todos los locales de la calle'}</h2><div class="list">${order.filter(id=>id!=='bonus').map(id=>{const p=P[id];const im=p?p.img||'rkt':{about:'kat-hd',editorial:'estridente',brief:'boladeoro',contact:'jarritos'}[id];const n=p?tr(p.n):{about:L=='en'?'About Kat':'Sobre Kat',editorial:L=='en'?'Back issues':'Números atrasados',brief:L=='en'?'In brief':'En breve',contact:L=='en'?'Contact':'Contacto'}[id];
+const sub=p?tr(p.k):{about:L=='en'?'Editor’s letter':'Carta editorial',editorial:'Líder · Mexijuku · Estridente',brief:BRIEF.map(b=>b[1]).slice(0,3).join(', ')+'…',contact:'akaiart.design@gmail.com'}[id];
+return `<button data-open="${id}">${id==='qm'?`<div style="aspect-ratio:3/2;background:#141113;color:#7ff5ea;display:grid;place-items:center;font:700 42px Silkscreen,monospace;border-bottom:3px solid #111;text-shadow:0 0 12px #36e0d0">LED</div>`:`<img src="img/${im}.${im==='kat-hd'?'png':'jpg'}" alt="" loading="lazy">`}<span>${n}<small>${sub}</small></span></button>`}).join('')}</div>`}
+let curId=null;const modal=$('#modal'),win=$('#win');
+function open(id){if(id==='sign'){toast(`<b>${tr(UI.next2)}</b>${tr(UI.nextT)}`);return}curId=id;paused=true;Object.keys(keys).forEach(k=>keys[k]=false);
+const i=order.indexOf(id);const nav=id==='list'?'':`<div class="nav"><button class="pbtn" data-nav="-1" ${i<=0?'disabled':''}>${tr(UI.prev)}</button><button class="pbtn" data-list="1">${tr(UI.list)}</button><button class="pbtn tq" data-nav="1" ${i>=order.length-1?'disabled':''}>${tr(UI.next)}</button></div>`;
+win.innerHTML=`<div class="top"><div></div><button class="pbtn x" data-close="1" aria-label="${tr(UI.close)}">✕</button></div>${id==='list'?list():content(id)}${nav}`;modal.classList.add('on');win.scrollTop=0;win.querySelector('[data-close]').focus()}
+function close(){modal.classList.remove('on');paused=false;curId=null;C.focus()}
+win.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+if(b.dataset.close)return close();if(b.dataset.list)return open('list');
+if(b.dataset.open){const o=S.find(s=>s.id===b.dataset.open);if(o&&started){pl.x=o.x+o.w/2;}return open(b.dataset.open)}
+if(b.dataset.nav){const i=order.indexOf(curId)+ +b.dataset.nav;const id=order[i];if(!id)return;const o=S.find(s=>s.id===id);if(o)pl.x=o.x+o.w/2;return open(id)}
+if(b.dataset.zoom){const lb=$('#lb');lb.querySelector('img').src='img/'+b.dataset.zoom+(b.dataset.png||b.dataset.zoom==='kat-hd'?'.png':'.jpg');lb.classList.add('on');$('#lbx').focus()}});
+modal.addEventListener('click',e=>{if(e.target===modal)close()});
+$('#lb').onclick=()=>$('#lb').classList.remove('on');
+function start(){started=true;$('#intro').style.display='none';$('#stage').classList.add('playing');C.focus()}
+$('#bPlay').onclick=start;$('#bSkip').onclick=()=>open('list');$('#bList').onclick=()=>open('list');
+$('#bLang').onclick=()=>{L=L=='en'?'es':'en';try{localStorage.setItem('kg-lang',L)}catch(e){}texts();if(curId)open(curId)};
+function texts(){document.documentElement.lang=L;$('#bList').textContent=tr(UI.list);$('#bLang').textContent=tr(UI.lang);$('#iT').innerHTML=tr(UI.iT);$('#iP').textContent=tr(UI.iP);$('#iK').textContent=tr(UI.iK);$('#bPlay').textContent='▶ '+tr(UI.play);$('#bSkip').textContent=tr(UI.list);$('#h1').textContent=tr(UI.h1);$('#h2').textContent=tr(UI.h2);$('#note').textContent=tr(UI.note);hud()}
+const KM={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'jump',w:'jump',W:'jump',' ':'jump',e:'enter',E:'enter',Enter:'enter',ArrowDown:'enter',s:'enter',S:'enter'};
+addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#lb').classList.contains('on'))$('#lb').classList.remove('on');else if(modal.classList.contains('on'))close();return}
+if(modal.classList.contains('on')||$('#lb').classList.contains('on'))return;
+if(!started&&(e.key==='Enter'||e.key===' ')){e.preventDefault();start();return}
+const k=KM[e.key];if(k&&started){e.preventDefault();if((k==='jump'||k==='enter')&&e.repeat)return;keys[k]=true}});
+addEventListener('keyup',e=>{const k=KM[e.key];if(k==='left'||k==='right')keys[k]=false});
+C.addEventListener('pointerdown',e=>{if(!started)return;const r=C.getBoundingClientRect(),wx=(e.clientX-r.left)/r.width*VW+cam,wy=(e.clientY-r.top)/r.height*VH;const o=S.find(o=>wx>=o.x&&wx<=o.x+o.w&&wy>GY-o.h-30&&wy<GY+10&&(o.id!=='bonus'||got.size>=TOTAL));if(o){target=o.x+o.w/2;if(Math.abs(pl.x-target)<8){target=null;open(o.id)}}});
+document.querySelectorAll('.pad button').forEach(b=>{const k=b.dataset.k;const on=e=>{e.preventDefault();if(!started)start();keys[k]=true;b.classList.add('on')};const off=e=>{if(k==='left'||k==='right')keys[k]=false;b.classList.remove('on')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off)});
+C.tabIndex=0;texts();
+const go=()=>requestAnimationFrame(frame);
+(document.fonts&&document.fonts.load?Promise.all([document.fonts.load('16px Silkscreen'),document.fonts.load('16px "Pixelify Sans"')]).catch(()=>{}):Promise.resolve()).then(go);
+}
+</script>
+</body>
+</html>
