@@ -64,6 +64,8 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pi
 .shots button{display:block;padding:0;border:3px solid #111;background:#111;cursor:zoom-in}
 .shots img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
 .shots .tall img{object-fit:contain;background:#e9e2d4}
+.gal{display:grid;gap:10px}.gal .main{display:block;padding:0;border:3px solid #111;cursor:zoom-in}.gal .main img{display:block;width:100%;aspect-ratio:4/3;object-fit:contain}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}.thumbs button{width:64px;height:64px;padding:0;border:3px solid #111;opacity:.6}.thumbs button.on,.thumbs button:hover{opacity:1;box-shadow:3px 3px 0 #14a396}.thumbs img{width:100%;height:100%;object-fit:cover;display:block}.thumbs button[data-sel^=logo] img{object-fit:contain;padding:4px}
 .fact{margin-top:14px;padding:10px 12px;border:2px dashed #14a396;font-size:14px;color:#3b352d}
 .fact b{font-family:"Pixelify Sans",monospace;color:#0b7d73}
 .nav{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:24px;border-top:3px solid #141113;padding-top:16px}
@@ -95,13 +97,14 @@ canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;image-rendering:pi
   <div class="bar">
     <span class="coins" id="coins"><i></i><span id="cc">0/9</span></span>
     <button class="pbtn" id="bList"></button>
+    <button class="pbtn" id="bSnd" aria-pressed="true"></button>
     <button class="pbtn" id="bLang"></button>
   </div>
 </header>
 <div class="stage" id="stage">
   <canvas id="c" width="768" height="432" aria-label="Game: walk down Kat's street and enter each shop to see a project"></canvas>
   <div class="intro" id="intro">
-    <img src="img/kat-hd.png" alt="Kat as a pixel character with turquoise headphones and overalls">
+    <img src="i/kat-hd.webp" alt="Kat as a pixel character with turquoise headphones and overalls">
     <div>
       <h1 id="iT"></h1>
       <p id="iP"></p>
@@ -124,39 +127,42 @@ let got=new Set();try{got=new Set(JSON.parse(localStorage.getItem('kg-coins')||'
 const tr=o=>o==null?'':typeof o==='string'?o:o[L];
 /* ---------- content ---------- */
 const P={
-jarritos:{img:'jarritos',img2:'jarritos2',n:'Sobremesa × Jarritos',y:'2026',k:{en:'Spec campaign for the UK · art direction & copy',es:'Campaña spec para UK · dirección de arte y copy'},d:{en:'English doesn’t have a word for it. We do.',es:'El inglés no tiene palabra para eso. Nosotros sí.'},
+jarritos:{n:'Sobremesa × Jarritos',y:'2026',k:{en:'Spec campaign for the UK · art direction & copy',es:'Campaña spec para UK · dirección de arte y copy'},d:{en:'English doesn’t have a word for it. We do.',es:'El inglés no tiene palabra para eso. Nosotros sí.'},
 b:{en:'A self-initiated campaign that gives Jarritos a reason to exist in Britain beyond the taco: it hands the country a word for something it already does. Out of home at Canary Wharf, the Tube and the pub, plus packaging, retail, social, film and an activation.',es:'Una campaña propia que le da a Jarritos una razón para existir en Gran Bretaña más allá del taco: le regala al país una palabra para algo que ya hace. Exteriores en Canary Wharf, el metro y el pub, más empaque, punto de venta, redes, film y una activación.'},
 t:{en:['Concept','Art direction','Copy','OOH','Packaging','Social'],es:['Concepto','Dirección de arte','Copy','Exteriores','Empaque','Redes']},s:{en:'Concept, art direction, copy and design: all mine. Not commissioned by or affiliated with Jarritos.',es:'Concepto, dirección de arte, copy y diseño: todo mío. No es un encargo de Jarritos ni está afiliado a la marca.'}},
-tawa:{img:'tawa',img2:'tawa2',tall2:1,n:'Tawa Tlan Salsas',y:'2024',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A salsa brand that had to look made by hand, because it is.',es:'Una marca de salsas que tenía que verse hecha a mano, porque lo es.'},
+tawa:{n:'Tawa Tlan Salsas',y:'2024',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A salsa brand that had to look made by hand, because it is.',es:'Una marca de salsas que tenía que verse hecha a mano, porque lo es.'},
 b:{en:'A hand-drawn chile stroke, a greca pattern and a circular seal carry the whole identity across six touchpoints: jars, bottles, bag, shop sign, apron and T-shirt. Everything had to survive a cheap print run and still feel like a family recipe.',es:'Un trazo de chile dibujado a mano, una greca y un sello circular sostienen toda la identidad en seis puntos de contacto: frascos, botellas, bolsa, letrero, mandil y playera. Todo tenía que aguantar una impresión barata y seguir sintiéndose receta de familia.'},
 t:{en:['Logo & seal','Greca pattern','Packaging','Signage','Merch'],es:['Logo y sello','Greca','Empaque','Letrero','Merch']},s:{en:'It began as a pencil sketch, and the system obeys a one-ink rule.',es:'Empezó como boceto a lápiz, y el sistema obedece la regla de una sola tinta.'}},
-chiq:{img:'chiq',img2:'chiq2',tall2:1,n:'Chiquitita Repostería',y:'2021',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A small-batch bakery, designed end to end by one person.',es:'Una repostería de lotes pequeños, diseñada de punta a punta por una sola persona.'},
+chiq:{n:'Chiquitita Repostería',y:'2021',k:{en:'Brand identity',es:'Identidad de marca'},d:{en:'A small-batch bakery, designed end to end by one person.',es:'Una repostería de lotes pequeños, diseñada de punta a punta por una sola persona.'},
 b:{en:'Logo system, colour, typography and packaging for a handmade pastry shop, plus a kit of templates the owners could run with on their own. Sweet without being saccharine.',es:'Sistema de logo, color, tipografía y empaque para una repostería artesanal, más un kit de plantillas para que las dueñas pudieran seguir solas. Dulce sin empalagar.'},
 t:{en:['Logo system','Packaging','Templates'],es:['Sistema de logo','Empaque','Plantillas']},s:{en:'Years later they still make on-brand material without me. That was the point.',es:'Años después siguen produciendo material on-brand sin mí. Esa era la idea.'}},
-cosm:{img:'cosm',img2:'cosm2',n:'La Cosmetiquería',y:'2026',k:{en:'Rebrand & design system',es:'Rebranding y design system'},d:{en:'A Guadalajara cosmetics brand, rebuilt around the Flor de Mayo.',es:'Una marca de cosmética de Guadalajara, reconstruida alrededor de la Flor de Mayo.'},
+cosm:{n:'La Cosmetiquería',y:'2026',k:{en:'Rebrand & design system',es:'Rebranding y design system'},d:{en:'A Guadalajara cosmetics brand, rebuilt around the Flor de Mayo.',es:'Una marca de cosmética de Guadalajara, reconstruida alrededor de la Flor de Mayo.'},
 b:{en:'New identity, packaging, web and tokens, so every product on the shelf speaks the same language and the next one practically designs itself.',es:'Identidad nueva, empaque, web y tokens, para que cada producto en el anaquel hable el mismo idioma y el siguiente casi se diseñe solo.'},
 t:{en:['Identity','Packaging','Web','Design tokens'],es:['Identidad','Empaque','Web','Tokens']},s:{en:'The case study opens with the old website, so you can see where it started.',es:'El case study arranca con el sitio anterior, para que se vea de dónde partió.'}},
-rkt:{img:'rkt',img2:'rkt2',tall2:1,n:'RKT Reketefácil',y:'2022–2024',k:{en:'Brand, mascot & app launch · Raxa Global',es:'Marca, mascota y lanzamiento de app · Raxa Global'},d:{en:'The friendly way to pay off your phone.',es:'La forma amable de terminar de pagar tu celular.'},
+rkt:{n:'RKT Reketefácil',y:'2022–2024',k:{en:'Brand, mascot & app launch · Raxa Global',es:'Marca, mascota y lanzamiento de app · Raxa Global'},d:{en:'The friendly way to pay off your phone.',es:'La forma amable de terminar de pagar tu celular.'},
 b:{en:'As marketing director at Raxa Global I designed RKT’s identity and its mascot, then launched the payments app with a campaign on social media and in stores. After launch, delinquency fell from 45% to 20%: one customer in two behind on payments became one in five.',es:'Como directora de marketing en Raxa Global diseñé la identidad de RKT y su mascota, y lancé la app de pagos con una campaña en redes y en tiendas. Después del lanzamiento, la morosidad bajó del 45% al 20%: de uno de cada dos clientes atrasados a uno de cada cinco.'},
 t:{en:['Identity','Mascot','App UX/UI','Launch campaign'],es:['Identidad','Mascota','UX/UI de app','Campaña de lanzamiento']},s:{en:'The mascot is called Reke, and she outlived my time there. She’s still in use.',es:'La mascota se llama Reke, y sobrevivió a mi salida. Se sigue usando.'}},
-alph:{img:'alph',img2:'alph2',n:'Alpheka Human Health',y:'2026',k:{en:'Brand identity & patient app (iOS)',es:'Identidad de marca y app para pacientes (iOS)'},d:{en:'An app that lowers anxiety, not information.',es:'Una app que baja la ansiedad, no la información.'},
+alph:{n:'Alpheka Human Health',y:'2026',k:{en:'Brand identity & patient app (iOS)',es:'Identidad de marca y app para pacientes (iOS)'},d:{en:'An app that lowers anxiety, not information.',es:'Una app que baja la ansiedad, no la información.'},
 b:{en:'A full redesign of the patient app for a private hospital group, and the identity around it: signage, stationery, uniforms. The goal was that someone with an appointment tomorrow understands what to do in five seconds, with one thumb. Sixteen high-fidelity screens, a condensed design system and WCAG 2.2 AA from the first decision.',es:'Rediseño completo de la app para pacientes de un grupo hospitalario privado, y la identidad alrededor: señalética, papelería, uniformes. La meta: que alguien con cita mañana entienda qué hacer en cinco segundos y con un pulgar. Dieciséis pantallas en alta fidelidad, un design system condensado y WCAG 2.2 AA desde la primera decisión.'},
 t:{en:['Identity','Signage','App UX/UI','Accessibility'],es:['Identidad','Señalética','UX/UI de app','Accesibilidad']},s:{en:'Every type size, colour and tap target was checked against the patients the hospital actually has: people between 20 and 80.',es:'Cada tamaño de letra, color y área táctil se revisó contra los pacientes reales del hospital: gente de 20 a 80 años.'}},
-meson:{img:'meson',img2:'meson2',n:'Mesón del Alférez',y:'2026',k:{en:'Product design · Android guest app',es:'Diseño de producto · app Android para huéspedes'},d:{en:'A colonial inn, in your pocket.',es:'Una posada colonial, en tu bolsillo.'},
+meson:{n:'Mesón del Alférez',y:'2026',k:{en:'Product design · Android guest app',es:'Diseño de producto · app Android para huéspedes'},d:{en:'A colonial inn, in your pocket.',es:'Una posada colonial, en tu bolsillo.'},
 b:{en:'A guest app for two historic boutique hotels: express booking shaped by each house, in-stay services and a concierge. The brief was to digitise the stay without losing the warmth, elegance and mystique of the place.',es:'Una app para huéspedes de dos hoteles boutique históricos: reserva exprés según cada casa, servicios durante la estancia y concierge. El reto: digitalizar la estancia sin perder la calidez, la elegancia y el misterio del lugar.'},
 t:{en:['UX','UI','Android'],es:['UX','UI','Android']},s:{en:'The hotels are in Xalapa and Coatepec, and the app is built for international travellers.',es:'Los hoteles están en Xalapa y Coatepec, y la app está pensada para viajeros internacionales.'}},
-incl:{img:'incl',img2:'incl2',tall2:1,n:{en:'Included, but not protected',es:'Incluidas, pero no protegidas'},y:'2026',k:{en:'Data visualisation · campaign concept',es:'Visualización de datos · concepto de campaña'},d:{en:'Access was step one. Protection is the gap.',es:'El acceso fue el primer paso. La protección es la brecha.'},
+incl:{n:{en:'Included, but not protected',es:'Incluidas, pero no protegidas'},y:'2026',k:{en:'Data visualisation · campaign concept',es:'Visualización de datos · concepto de campaña'},d:{en:'Access was step one. Protection is the gap.',es:'El acceso fue el primer paso. La protección es la brecha.'},
 b:{en:'A self-initiated launch campaign concept on the gender gap in financial inclusion in Mexico: a long-form infographic, a special report, a factsheet, an event kit, a landing page with a data explorer, plus email and social.',es:'Un concepto propio de campaña de lanzamiento sobre la brecha de género en la inclusión financiera en México: infografía larga, reporte especial, factsheet, kit de evento, landing con explorador de datos, email y redes.'},
 t:{en:['Infographic','Report','Landing page','Social'],es:['Infografía','Reporte','Landing','Redes']},s:{en:'Researched with Claude, assets drawn in Illustrator, assembled in Figma.',es:'Investigado con Claude, assets en Illustrator, armado en Figma.'}},
 qm:{n:'Quarter Mile',y:'2025–',k:{en:'Lead Designer · marketing agency, Texas',es:'Lead Designer · agencia de marketing, Texas'},d:{en:'Full time, remote, and everything at once.',es:'Tiempo completo, remoto, y todo a la vez.'},
 b:{en:'Editorial print, large format, email, branding and social for a US marketing agency. And LED channel letters, which is a sentence I never expected to write in a portfolio.',es:'Editorial impreso, gran formato, email, branding y redes para una agencia de marketing en EE. UU. Y letras de canal LED, una frase que nunca pensé escribir en un portafolio.'},
 t:{en:['Print','Large format','Email','Social','Signage'],es:['Impreso','Gran formato','Email','Redes','Letreros']},s:{en:'I’m also the bridge between design and the sales team.',es:'También soy el puente entre diseño y el equipo de ventas.'}}};
+const GAL={"jarritos": ["jar-act", "jar-tube", "jar-retail", "jar-canary"], "tawa": ["logo-tawa", "tawa-app", "tawa-cover"], "chiq": ["logo-chiq", "chiq-pack", "chiq-promo", "chiq-visit"], "cosm": ["logo-cosm", "cosm-pack", "cosm-shampoo", "cosm-esen", "cosm-crema2", "cosm-acond", "cosm-labels", "cosm-versions"], "rkt": ["logo-rkt", "rkt-cover", "rkt-before", "rkt-r", "rkt-inuse", "rkt-mascot", "rkt-muertos", "rkt-store"], "alph": ["logo-alph", "alph-uni", "alph-pap", "alph-app", "alph-sign"], "meson": ["meson-cover", "meson-conc", "meson-place"], "incl": ["incl-hero", "incl-report", "incl-info"]};
+const LBG={'logo-tawa':'#ffffff','logo-chiq':'#ffffff','logo-cosm':'#ffffff','logo-rkt':'#ffffff','logo-alph':'#3f2638'};
+const full=n=>n==='kat-hd'?'i/kat-hd.webp':'i/'+n+'.webp',thumb=n=>n.startsWith('logo-')?'i/'+n+'.webp':n==='kat-hd'?'i/kat-hd.webp':'i/t-'+n+'.webp';
 const BRIEF=[['boladeoro','Bola de Oro',{en:'Email marketing for a fifty-year-old coffee roaster',es:'Email marketing para una tostadora de café con cincuenta años'}],['brunch','Mr. Brunch',{en:'Social campaign: one grid, one yellow, zero exceptions',es:'Campaña de redes: una retícula, un amarillo, cero excepciones'}],['miprecio','Mi Precio',{en:'Logo and web app so makers charge what their work is worth',es:'Logo y web app para cobrar lo que vale tu trabajo'}],['windtree','Wind Tree Plaza',{en:'Brand identity: a grove of turbines for a high-end plaza',es:'Identidad: un bosque de turbinas para una plaza de alto nivel'}],['softwitch','Soft Witch Deck',{en:'Mobile app UX/UI in two skins, day and night',es:'UX/UI de app móvil con dos pieles, día y noche'}],['loli','Loli in the Sky',{en:'Own e-commerce concept: walk on clouds, stay sweet',es:'Concepto propio de e-commerce: camina en las nubes'}]];
 const UI={list:{en:'Skip to the work',es:'Ver sin jugar'},lang:{en:'Español',es:'English'},play:{en:'Press start',es:'Empezar'},
 iT:{en:'KETZER<small>From Mexico to London · level 1</small>',es:'KETZER<small>De México a Londres · nivel 1</small>'},
 iP:{en:'A playable portfolio by Kat González, senior graphic designer and art director. Walk down my street: every shop is a project. Collect the nine seals on the way.',es:'Un portafolio jugable de Kat González, diseñadora gráfica senior y directora de arte. Camina por mi calle: cada local es un proyecto. Junta los nueve sellos en el camino.'},
 iK:{en:'← → walk · Space jump · E enter · or click any shop',es:'← → caminar · Espacio saltar · E entrar · o haz clic en un local'},
-h1:{en:'← → walk · Space jump · E enter a shop',es:'← → caminar · Espacio saltar · E entrar al local'},h2:{en:'Tip: click a shop and I’ll walk there',es:'Tip: haz clic en un local y camino hacia él'},
+h1:{en:'← → walk · Space jump · E enter a shop · M sound',es:'← → caminar · Espacio saltar · E entrar al local · M sonido'},h2:{en:'Tip: click a shop and I’ll walk there',es:'Tip: haz clic en un local y camino hacia él'},
 enter:{en:'E  ENTER',es:'E  ENTRAR'},prev:{en:'◀ Previous shop',es:'◀ Local anterior'},next:{en:'Next shop ▶',es:'Siguiente local ▶'},close:{en:'Close',es:'Cerrar'},
 seal:{en:'Seal',es:'Sello'},fact:{en:'Seal fact',es:'Dato del sello'},hidden:{en:'Find this shop’s seal to unlock a behind-the-scenes fact.',es:'Encuentra el sello de este local para ver un dato de detrás de escena.'},
 all:{en:'All nine! A secret door just opened at the end of the street.',es:'¡Los nueve! Se abrió una puerta secreta al final de la calle.'},
@@ -166,11 +172,11 @@ next2:{en:'Next stop: London',es:'Próxima parada: Londres'},nextT:{en:'I’m re
 const S=[
 {id:'about',kind:'shop',w:240,h:220,wall:'#1fa79b',trim:'#efe2c8',sign:{en:'KAT’S STUDIO',es:'ESTUDIO KAT'},sbg:'#efe2c8',sfg:'#141113',awn:['#141113','#efe2c8'],win:'kat'},
 {id:'tawa',kind:'stall',w:230,h:170},
-{id:'chiq',kind:'shop',w:250,h:205,wall:'#f39bb7',trim:'#fff2f5',sign:'CHIQUITITA',sbg:'#fff',sfg:'#d92d68',awn:['#d92d68','#fff'],win:'chiq',logo:'logo-chiq',lbg:'#ffffff',pad:2,ps:2},
-{id:'cosm',kind:'shop',w:260,h:250,wall:'#8c1d3b',trim:'#e9c46a',sign:'LA COSMETIQUERÍA',sbg:'#e9c46a',sfg:'#5a0f24',awn:['#5a0f24','#f3e1c8'],win:'cosm2',logo:'logo-cosm',lbg:'#f6ecdd',pad:3},
+{id:'chiq',kind:'shop',w:260,h:240,wall:'#f39bb7',trim:'#fff2f5',sign:'CHIQUITITA',sbg:'#fff',sfg:'#d92d68',awn:['#d92d68','#fff'],win:'chiq',logo:'logo-chiq',lbg:'#ffffff',pad:2,ps:2},
+{id:'cosm',kind:'shop',w:270,h:268,wall:'#8c1d3b',trim:'#e9c46a',sign:'LA COSMETIQUERÍA',sbg:'#e9c46a',sfg:'#5a0f24',awn:['#5a0f24','#f3e1c8'],win:'cosm2',logo:'logo-cosm',lbg:'#ffffff',pad:3,ps:2},
 {id:'editorial',kind:'kiosk',w:180,h:160},
-{id:'rkt',kind:'shop',w:260,h:215,wall:'#6c3fa0',trim:'#7ac143',sign:'RKT',sbg:'#7ac143',sfg:'#fff',win:'rkt',glass:1,logo:'logo-rkt',lbg:'#ffffff',pad:2},
-{id:'alph',kind:'shop',w:260,h:240,wall:'#f3eee8',trim:'#4b2e4f',sign:'ALPHEKA',sbg:'#4b2e4f',sfg:'#fff',win:'alph',cross:1,logo:'logo-alph',lbg:'#3f2638',pad:2,ps:2},
+{id:'rkt',kind:'shop',w:270,h:245,wall:'#6c3fa0',trim:'#7ac143',sign:'RKT',sbg:'#7ac143',sfg:'#fff',win:'rkt',glass:1,logo:'logo-rkt',lbg:'#ffffff',pad:2,ps:2},
+{id:'alph',kind:'shop',w:270,h:250,wall:'#f3eee8',trim:'#4b2e4f',sign:'ALPHEKA',sbg:'#4b2e4f',sfg:'#fff',win:'alph',cross:1,logo:'logo-alph',lbg:'#3f2638',pad:2,ps:2},
 {id:'meson',kind:'meson',w:310,h:235},
 {id:'incl',kind:'billboard',w:230,h:260},
 {id:'qm',kind:'neon',w:270,h:225},
@@ -185,11 +191,11 @@ const FEAT=['tawa','chiq','cosm','rkt','alph','meson','incl','qm','jarritos'];
 const coins=FEAT.map((id,i)=>{const o=S.find(s=>s.id===id);const gx=id==='jarritos'?o.x+o.w+36:id==='qm'?o.x+o.w+50:o.x+o.w+36;return{id,x:gx,y:GY-150-(i%3)*16}});
 const TOTAL=coins.length;
 /* ---------- assets ---------- */
-const IM={};const need=['logo-chiq','logo-cosm','logo-tawa','logo-rkt','logo-alph','kat','jarritos2','chiq','cosm2','rkt','alph','meson','incl','lider','estridente',...BRIEF.map(b=>b[0])];
+const IM={};const need=['logo-chiq','logo-cosm','logo-tawa','logo-rkt','logo-alph','kat','jar-tube','meson-cover','incl-hero','meson-place','lider','estr-cover',...BRIEF.map(b=>b[0])];
 const PIX={};
 function pixel(name,w,h){const k=name+w+'x'+h;if(PIX[k])return PIX[k];const im=IM[name];if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=Math.max(4,Math.round(w/3));c.height=Math.max(4,Math.round(h/3));const g=c.getContext('2d');g.imageSmoothingQuality='high';
 const r=Math.max(c.width/im.naturalWidth,c.height/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;g.drawImage(im,(c.width-dw)/2,(c.height-dh)/2,dw,dh);return PIX[k]=c}
-for(const n of need){const i=new Image();i.src=n==='kat'||n.startsWith('logo-')?'img/'+n+'.png':'img/'+n+'.jpg';IM[n]=i}
+for(const n of need){const i=new Image();i.src=n==='kat'?'i/kat.png':thumb(n);IM[n]=i}
 function pixelLogo(name,w,h,bg,ps,pad){const k='L'+name+w+'x'+h+ps;if(PIX[k])return PIX[k];const im=IM[name];if(!im||!im.complete||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=Math.round(w/ps);c.height=Math.round(h/ps);const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';const r=Math.min((c.width-pad*2)/im.naturalWidth,(c.height-pad*2)/im.naturalHeight),dw=im.naturalWidth*r,dh=im.naturalHeight*r;g.drawImage(im,(c.width-dw)/2,(c.height-dh)/2,dw,dh);return PIX[k]=c}
 function logoWin(x,y,w,h,name,bg,ps=3,pad=3){box(x,y,w,h,bg);const p=pixelLogo(name,w,h,bg,ps,pad);if(p)X.drawImage(p,Math.round(x-cam),Math.round(y),w,h);R(x+6,y+6,4,h-12,'#ffffff4d');R(x+14,y+6,2,h-12,'#ffffff33');R(x,y+h,w,4,'#00000033')}
 /* ---------- canvas helpers ---------- */
@@ -215,22 +221,22 @@ if(o.cross){const cx=o.x+o.w-46,cy=y+80;R(cx-6,cy-18,12,36,'#4b2e4f');R(cx-18,cy
 if(o.flower){const cx=o.x+o.w-44,cy=wy-22;for(let k=0;k<5;k++){const a=k*1.2566-1.57;R(cx+Math.cos(a)*9-5,cy+Math.sin(a)*9-5,10,10,'#f3e1c8')}R(cx-4,cy-4,8,8,'#e9c46a')}
 R(o.x-4,GY-6,o.w+8,6,'#00000030')}
 function drawStall(o,t){const y=GY-o.h;R(o.x+10,y+30,6,o.h-30,'#5b3a29');R(o.x+o.w-16,y+30,6,o.h-30,'#5b3a29');
-const sz=84,sx=o.x+o.w/2-sz/2,sy=y-56;R(o.x+o.w/2-1,sy+sz,2,12,'#141113');logoWin(sx,sy,sz,sz,'logo-tawa','#ffffff',3,1);
+const sz=112,sx=o.x+o.w/2-sz/2,sy=y-84;R(o.x+o.w/2-1,sy+sz,2,12,'#141113');logoWin(sx,sy,sz,sz,'logo-tawa','#ffffff',3,1);
 awning(o.x,y+34,o.w,['#c2412d','#f2b134']);
 box(o.x+6,GY-64,o.w-12,64,'#8a5a3b');for(let i=0;i<o.w-12;i+=24){R(o.x+6+i,GY-64,2,64,'#6e4630')}
 for(let i=0;i<o.w-20;i+=20){R(o.x+10+i,GY-30,8,4,'#f2b134');R(o.x+14+i,GY-34,4,4,'#f2b134');R(o.x+18+i,GY-26,6,4,'#f2b134')}
 for(let i=0;i<7;i++){const jx=o.x+22+i*28,jy=GY-88;box(jx,jy,18,22,'#c2412d');R(jx,jy-6,18,6,'#f2b134');R(jx+3,jy+7,12,8,'#fff6e6')}}
 function drawKiosk(o,t){const y=GY-o.h;box(o.x,y+20,o.w,o.h-20,'#2f6b4f');R(o.x-10,y+8,o.w+20,16,'#c2412d');R(o.x-10,y+4,o.w+20,4,'#141113');
 box(o.x+14,y+30,o.w-28,24,'#f6f0e4');fitT(L=='en'?'MAGAZINES':'REVISTAS',o.x+o.w/2,y+42,o.w-40,14,'#141113');
-const cw=46,ch=62,gy=y+66;img('lider',o.x+12,gy,cw,ch);img('estridente',o.x+12+cw+8,gy,cw,ch);box(o.x+12+2*(cw+8),gy,cw,ch,'#f2b134');T('MEXI',o.x+12+2*(cw+8)+cw/2,gy+20,10,'#141113');T('JUKU',o.x+12+2*(cw+8)+cw/2,gy+34,10,'#d92d68');
+const cw=46,ch=62,gy=y+66;img('lider',o.x+12,gy,cw,ch);img('estr-cover',o.x+12+cw+8,gy,cw,ch);box(o.x+12+2*(cw+8),gy,cw,ch,'#f2b134');T('MEXI',o.x+12+2*(cw+8)+cw/2,gy+20,10,'#141113');T('JUKU',o.x+12+2*(cw+8)+cw/2,gy+34,10,'#d92d68');
 box(o.x+10,GY-30,o.w-20,30,'#24543e')}
 function drawMeson(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#e8b43a');R(o.x,GY-70,o.w,70,'#b8322a');
 for(let r=0;r<4;r++){R(o.x-12+r*3,y-24+r*6,o.w+24-r*6,6,r%2?'#8c3b22':'#a8492b')}R(o.x-12,y-28,o.w+24,4,'#141113');
 const ax=o.x+o.w-110,aw=72,ah=118;box(ax,GY-ah,aw,ah,'#1f4f8a');X.fillStyle='#141113';X.beginPath();X.arc(Math.round(ax+aw/2-cam),GY-ah,aw/2+2,Math.PI,0);X.fill();X.fillStyle='#1f4f8a';X.beginPath();X.arc(Math.round(ax+aw/2-cam),GY-ah,aw/2,Math.PI,0);X.fill();R(ax+aw/2-1,GY-ah,2,ah,'#143a66');
-windowImg(o.x+22,y+60,o.w-160,110,'meson');R(o.x+16,y+56,o.w-148,4,'#141113');
+windowImg(o.x+22,y+60,o.w-160,110,'meson-place');R(o.x+16,y+56,o.w-148,4,'#141113');
 R(o.x+o.w/2-40,y+22,80,3,'#141113');box(o.x+o.w/2-74,y+28,148,22,'#f6f0e4');fitT('MESÓN DEL ALFÉREZ',o.x+o.w/2,y+39,136,11,'#8c1d1d');
 const lx=ax-22,ly=GY-ah-10;R(lx,ly-14,2,14,'#141113');box(lx-6,ly,14,18,'#f2b134');if(Math.sin(t/300)>-.6)R(lx-2,ly+4,6,10,'#fff3b0')}
-function drawBill(o,t){const y=GY-o.h;R(o.x+40,y+150,8,o.h-150,'#3b3b3b');R(o.x+o.w-48,y+150,8,o.h-150,'#3b3b3b');box(o.x,y,o.w,150,'#5b2a86');img('incl',o.x+6,y+6,o.w-12,138);
+function drawBill(o,t){const y=GY-o.h;R(o.x+40,y+150,8,o.h-150,'#3b3b3b');R(o.x+o.w-48,y+150,8,o.h-150,'#3b3b3b');box(o.x,y,o.w,150,'#5b2a86');img('incl-hero',o.x+6,y+6,o.w-12,138);
 for(let i=0;i<4;i++){R(o.x+20+i*60,y-10,10,6,'#141113');R(o.x+22+i*60,y-4,6,4,'#fff3b0')}R(o.x+20,y+156,o.w-40,4,'#3b3b3b')}
 function drawNeon(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#d8b98a');R(o.x-6,y-8,o.w+12,10,'#b8956a');R(o.x,y+o.h-80,o.w,4,'#b8956a');
 const on=!(Math.floor(t/90)%23===0||Math.floor(t/70)%31===0);X.save();if(on){X.shadowColor='#36e0d0';X.shadowBlur=18}T('LED',o.x+o.w/2,y+62,62,on?'#7ff5ea':'#5f8f8a');X.restore();
@@ -243,7 +249,7 @@ function drawSign(o,t){const y=GY-o.h;R(o.x+o.w/2-4,y+40,8,o.h-40,'#3b3b3b');box
 fitT(L=='en'?'NEXT STOP':'PRÓXIMA PARADA',o.x+o.w/2,y+26,o.w-24,13,'#fff');fitT(L=='en'?'LONDON  ✈':'LONDRES  ✈',o.x+o.w/2,y+50,o.w-24,18,'#f2b134')}
 function drawStation(o,t){const y=GY-o.h;box(o.x,y,o.w,o.h,'#8a3f2f');for(let r=0;r<o.h;r+=10)for(let c=(r/10)%2*12;c<o.w;c+=24)R(o.x+c,y+r,2,10,'#6e2f23');for(let r=0;r<o.h;r+=10)R(o.x,y+r,o.w,2,'#6e2f23');
 box(o.x+16,y+14,o.w-32,30,'#1c2a5c');fitT('STATION',o.x+o.w/2,y+29,o.w-60,16,'#fff');
-box(o.x+20,y+60,170,120,'#0f6b3a');img('jarritos2',o.x+26,y+66,158,96);fitT('SOBREMESA (n.)',o.x+105,y+172,150,10,'#fbe9c8');
+box(o.x+20,y+60,170,120,'#0f6b3a');img('jar-tube',o.x+26,y+66,158,96);fitT('SOBREMESA (n.)',o.x+105,y+172,150,10,'#fbe9c8');
 const sx=o.x+210,sw=100;box(sx,GY-110,sw,110,'#141113');for(let i=0;i<6;i++)R(sx+6,GY-100+i*16,sw-12,3,'#2c2c2c');R(sx-6,GY-120,4,120,'#c9c9c9');R(sx+sw+2,GY-120,4,120,'#c9c9c9')}
 function drawPhone(o,t){const y=GY-o.h;box(o.x,y+16,o.w,o.h-16,'#c8102e');X.fillStyle='#141113';X.beginPath();X.arc(Math.round(o.x+o.w/2-cam),y+18,o.w/2+2,Math.PI,0);X.fill();X.fillStyle='#c8102e';X.beginPath();X.arc(Math.round(o.x+o.w/2-cam),y+18,o.w/2,Math.PI,0);X.fill();
 box(o.x+10,y+24,o.w-20,16,'#141113');fitT(L=='en'?'CONTACT':'CONTACTO',o.x+o.w/2,y+32,o.w-26,11,'#fff');
@@ -273,15 +279,15 @@ function update(dt){const k=dt/16.67;const left=keys.left,right=keys.right;
 if(target!=null&&(left||right))target=null;
 let dir=(right?1:0)-(left?1:0);if(target!=null){const d=target-pl.x;dir=Math.abs(d)<6?0:Math.sign(d);if(!dir){const o=S.find(o=>Math.abs(o.x+o.w/2-target)<2);target=null;if(o)open(o.id)}}
 pl.vx=lerp(pl.vx,dir*4.6,.25*k);if(dir)pl.face=dir;pl.x=Math.max(40,Math.min(WORLD-40,pl.x+pl.vx*k));
-if(keys.jump&&pl.ground){pl.vy=-15.5;pl.ground=false;keys.jump=false}
-pl.vy+=0.85*k;pl.y+=pl.vy*k;if(pl.y>=FEET){pl.y=FEET;pl.vy=0;pl.ground=true}
-pl.walk+=Math.abs(pl.vx)*k*.12;
+if(keys.jump&&pl.ground){pl.vy=-15.5;pl.ground=false;keys.jump=false;SFX.jump()}
+pl.vy+=0.85*k;pl.y+=pl.vy*k;if(pl.y>=FEET){if(!pl.ground)SFX.land();pl.y=FEET;pl.vy=0;pl.ground=true}
+pl.walk+=Math.abs(pl.vx)*k*.12;{const ph=Math.floor(pl.walk/Math.PI);if(ph!==pl.ph&&pl.ground&&Math.abs(pl.vx)>1)SFX.step();pl.ph=ph}
 cam=Math.max(0,Math.min(WORLD-VW,pl.x-VW*.42));
-near=S.find(o=>pl.x>o.x-10&&pl.x<o.x+o.w+10&&(o.id!=='bonus'||got.size>=TOTAL))||null;
+{const nn=S.find(o=>pl.x>o.x-10&&pl.x<o.x+o.w+10&&(o.id!=='bonus'||got.size>=TOTAL))||null;if(nn&&nn!==near)SFX.blip();near=nn}
 const te=$('#tEnter');if(te)te.disabled=!near;
 if(keys.enter){keys.enter=false;if(near)open(near.id)}
 for(const c of coins){if(got.has(c.id))continue;if(Math.abs(pl.x-c.x)<28&&c.y>pl.y-104&&c.y<pl.y){got.add(c.id);try{localStorage.setItem('kg-coins',JSON.stringify([...got]))}catch(e){}hud();
-const p=P[c.id];toast(`<b>${tr(UI.seal)} ${got.size}/${TOTAL} · ${tr(p.n)}</b>${tr(p.s)}${got.size>=TOTAL?'<br><br>'+tr(UI.all):''}`);burst(c.x,c.y)}}
+SFX.coin();if(got.size>=TOTAL)setTimeout(SFX.fan,300);const p=P[c.id];toast(`<b>${tr(UI.seal)} ${got.size}/${TOTAL} · ${tr(p.n)}</b>${tr(p.s)}${got.size>=TOTAL?'<br><br>'+tr(UI.all):''}`);burst(c.x,c.y)}}
 parts.forEach(p=>{p.x+=p.vx*k;p.y+=p.vy*k;p.vy+=.3*k;p.l-=k});parts=parts.filter(p=>p.l>0);
 if(pl.ground&&Math.abs(pl.vx)>2&&Math.random()<.25*k)parts.push({x:pl.x-pl.face*14,y:FEET-2,vx:-pl.face*Math.random(),vy:-Math.random()*1.4,l:18,c:'#cdbb98',s:4})}
 let parts=[];function burst(x,y){for(let i=0;i<18;i++)parts.push({x,y,vx:Math.cos(i)*3,vy:Math.sin(i*1.7)*3-2,l:30,c:i%2?'#14a396':'#f2b134',s:4})}
@@ -291,46 +297,79 @@ X.save();X.translate(Math.round(pl.x-cam),Math.round(pl.y+bob));X.scale(pl.face,
 function drawCoins(t){for(const c of coins){if(got.has(c.id))continue;const y=c.y+Math.sin(t/300+c.x)*4,w=Math.max(2,Math.abs(Math.cos(t/260+c.x))*22);R(c.x-w/2-2,y-13,w+4,26,'#141113');R(c.x-w/2,y-11,w,22,'#14a396');R(c.x-w/2-4,y-9,w+8,18,'#141113');R(c.x-w/2-2,y-7,w+4,14,'#14a396');if(w>12){R(c.x-2,y-8,4,4,'#f6f0e4');R(c.x-6,y-4,12,4,'#f6f0e4');R(c.x-4,y,8,4,'#f6f0e4');R(c.x-6,y+4,4,3,'#f6f0e4');R(c.x+2,y+4,4,3,'#f6f0e4')}R(c.x-w/2+2,y-9,3,5,'#7ff5ea')}}
 function bubble(t){if(!near||paused)return;const s=near.id==='sign'?(L=='en'?'E  READ':'E  LEER'):tr(UI.enter);X.font='13px Silkscreen, monospace';const w=X.measureText(s).width+22,x=pl.x-w/2,y=pl.y-136+Math.sin(t/200)*2;box(x,y,w,24,'#f6f0e4');R(pl.x-4,y+26,8,4,'#141113');T(s,pl.x,y+12,13,'#141113')}
 function frame(t){const dt=Math.min(40,t-(frame.l||t));frame.l=t;if(started&&!paused)update(dt);else cam=Math.max(0,Math.min(WORLD-VW,pl.x-VW*.42));
-X.setTransform(1,0,0,1,0,0);const k=bg(t);picado();lamps();
+X.setTransform(1,0,0,1,0,0);const k=bg(t);A.lon=k;picado();lamps();
 for(const o of S){if(o.x+o.w+60<cam||o.x-60>cam+VW)continue;DRAW[o.kind](o,t)}
 street(k);drawCoins(t);for(const p of parts)R(p.x,p.y,p.s,p.s,p.c);drawPlayer(t);bubble(t);
 if(k>.4){X.fillStyle=`rgba(200,215,230,${(k-.4)*.8})`;for(const r of rain){r.y=(r.y+9)%VH;r.x=(r.x-2+VW)%VW;X.fillRect(r.x,r.y,1,8)}}
 requestAnimationFrame(frame)}
+
+/* ---------- audio (synthesised, no files) ---------- */
+const A={ctx:null,on:true,master:null,mus:null,sfx:null,rain:null,step:0,next:0,lon:0,duck:1};
+try{A.on=localStorage.getItem('kg-sound')!=='off'}catch(e){}
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function audioInit(){if(A.ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=A.ctx=new AC();
+A.master=c.createGain();A.master.gain.value=A.on?1:0;A.master.connect(c.destination);
+A.mus=c.createGain();A.mus.gain.value=.16;A.mus.connect(A.master);A.sfx=c.createGain();A.sfx.gain.value=.45;A.sfx.connect(A.master);
+const nb=c.createBuffer(1,c.sampleRate*2,c.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;A.noise=nb;
+const rs=c.createBufferSource();rs.buffer=nb;rs.loop=true;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2600;bp.Q.value=.6;A.rain=c.createGain();A.rain.gain.value=0;rs.connect(bp);bp.connect(A.rain);A.rain.connect(A.master);rs.start();
+A.next=c.currentTime+.1;setInterval(sched,25)}
+function tone(f,d,type='square',v=.3,f2,when,dest){if(!A.ctx)return;const c=A.ctx,t=when||c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(dest||A.sfx);o.start(t);o.stop(t+d+.02)}
+function hiss(d,v,freq=3000,when,dest){if(!A.ctx)return;const c=A.ctx,t=when||c.currentTime,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();s.buffer=A.noise;f.type='highpass';f.frequency.value=freq;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(f);f.connect(g);g.connect(dest||A.sfx);s.start(t,Math.random());s.stop(t+d+.02)}
+const SFX={jump:()=>tone(320,.16,'square',.22,760),land:()=>tone(140,.08,'triangle',.35,70),step:()=>hiss(.03,.12,1800),
+coin:()=>{tone(988,.08,'square',.22);tone(1319,.22,'square',.22,null,A.ctx&&A.ctx.currentTime+.08)},
+fan:()=>{if(!A.ctx)return;[72,76,79,84,79,84].forEach((m,i)=>tone(mtof(m),.16,'square',.22,null,A.ctx.currentTime+.1*i))},
+open:()=>{if(!A.ctx)return;[60,64,67,72].forEach((m,i)=>tone(mtof(m),.12,'triangle',.3,null,A.ctx.currentTime+.05*i))},
+close:()=>{if(!A.ctx)return;[72,67,60].forEach((m,i)=>tone(mtof(m),.1,'triangle',.25,null,A.ctx.currentTime+.05*i))},
+blip:()=>tone(1046,.05,'square',.1)};
+const _=0;
+const SONG={mx:{lead:[72,_,76,_,79,_,76,74,72,_,74,76,74,_,71,_,69,_,72,_,76,_,74,72,71,_,72,74,72,_,_,_],bass:[48,_,55,_,48,_,55,_,53,_,60,_,53,_,60,_,45,_,52,_,45,_,52,_,43,_,50,_,48,_,_,_]},
+lon:{lead:[69,_,72,_,76,_,74,72,71,_,72,74,76,_,_,_,77,_,76,74,72,_,71,_,69,_,_,_,_,_,_,_],bass:[45,_,52,_,45,_,52,_,41,_,48,_,41,_,48,_,38,_,45,_,38,_,45,_,40,_,47,_,45,_,_,_]}};
+function sched(){if(!A.ctx||!started)return;const c=A.ctx,st=60/112/2;
+A.mus.gain.setTargetAtTime(.16*A.duck,c.currentTime,.2);A.rain.gain.setTargetAtTime(A.lon>.4?(A.lon-.4)*.09:0,c.currentTime,.4);
+while(A.next<c.currentTime+.12){const i=A.step%32,p=A.lon>.5?SONG.lon:SONG.mx;if(p.lead[i])tone(mtof(p.lead[i]),st*1.6,'square',.12,null,A.next,A.mus);if(p.bass[i])tone(mtof(p.bass[i]),st*1.8,'triangle',.3,null,A.next,A.mus);if(i%2===0)hiss(.03,i%8===4?.12:.05,6000,A.next,A.mus);A.next+=st;A.step++}}
+function soundBtn(){const b=$('#bSnd');if(b){b.textContent=(A.on?'♪ ':'✕ ')+(L=='en'?(A.on?'Sound on':'Sound off'):(A.on?'Sonido':'Sin sonido'));b.setAttribute('aria-pressed',A.on)}}
+function toggleSound(){A.on=!A.on;try{localStorage.setItem('kg-sound',A.on?'on':'off')}catch(e){}if(A.ctx){A.master.gain.setTargetAtTime(A.on?1:0,A.ctx.currentTime,.05);if(A.ctx.state==='suspended')A.ctx.resume()}else if(A.on&&started)audioInit();soundBtn()}
+
 /* ---------- UI ---------- */
 function hud(){$('#cc').textContent=`${got.size}/${TOTAL}`}
 let tt;function toast(h){const t=$('#toast');t.innerHTML=h;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),5200)}
 const order=S.filter(o=>o.id!=='sign'&&(o.id!=='bonus'||got.size>=TOTAL)).map(o=>o.id);
+const gal=a=>{if(!a.length)return '';const m=a[0];return `<div class="gal"><button class="main" data-zoom="${m}" style="background:${LBG[m]||'#e9e2d4'}"><img src="${full(m)}" alt=""></button>${a.length>1?`<div class="thumbs">${a.map((n,i)=>`<button data-sel="${n}" class="${i?'':'on'}" style="background:${LBG[n]||'#e9e2d4'}" aria-label="Image ${i+1}"><img src="${thumb(n)}" alt="" loading="lazy"></button>`).join('')}</div>`:''}</div>`};
 const shot=(n,tall)=>`<button class="${tall?'tall':''}" data-zoom="${n}"><img src="img/${n}.jpg" alt="" loading="lazy"></button>`;
-function content(id){if(P[id]){const p=P[id];return `<p class="kick">${tr(p.k)} · ${p.y}</p><h2>${tr(p.n)}</h2><p class="deck">${tr(p.d)}</p><div class="grid2"><div><p class="body">${tr(p.b)}</p><ul class="tags">${tr(p.t).map(x=>`<li>${x}</li>`).join('')}</ul>${got.has(id)?`<div class="fact"><b>★ ${tr(UI.fact)}</b><br>${tr(p.s)}</div>`:`<div class="fact">${tr(UI.hidden)}</div>`}</div><div class="shots">${p.img?shot(p.img):''}${p.img2?shot(p.img2,p.tall2):''}</div></div>`}
-if(id==='about')return `<p class="kick">${L=='en'?'Kat’s studio · editor’s letter':'Estudio Kat · carta editorial'}</p><h2>${L=='en'?'Hi, I’m Kat.':'Hola, soy Kat.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Senior graphic designer and art director with ten years across branding, editorial, UX/UI, packaging and paid media. I started out laying out magazines in Mexico and never stopped thinking in spreads. I hold an MA in Editorial Design, I write in two languages, and I use AI as part of the production line, not instead of it.':'Diseñadora gráfica senior y directora de arte con diez años entre branding, editorial, UX/UI, empaque y medios pagados. Empecé formando revistas en México y nunca dejé de pensar en pliegos. Tengo maestría en Diseño Editorial, escribo en dos idiomas y uso la IA como parte de la producción, no en su lugar.'}</p><p class="body">${L=='en'?'Walk east. Every shop on this street is a project, and the street ends where I’m headed.':'Camina hacia la derecha. Cada local de esta calle es un proyecto, y la calle termina hacia donde voy.'}</p></div><div class="shots"><button class="tall" data-zoom="kat-hd" data-png="1"><img src="img/kat-hd.png" alt="Kat, pixel version"></button></div></div>`;
-if(id==='editorial')return `<p class="kick">${L=='en'?'Back issues · editorial design':'Números atrasados · diseño editorial'}</p><h2>${L=='en'?'Before brands, there were magazines.':'Antes de las marcas, hubo revistas.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Líder, Mexijuku and Estridente taught me the grid, the deadline and the cover line. Líder, on politics and business, was rebuilt around a single editorial grid; Estridente is an independent cultural magazine for Xalapa, art-directed from masthead to colophon.':'Líder, Mexijuku y Estridente me enseñaron la retícula, el cierre y la línea de portada. Líder, de política y negocios, se rehízo alrededor de una sola retícula; Estridente es una revista cultural independiente de Xalapa, con dirección de arte del cabezal al colofón.'}</p><ul class="tags"><li>${L=='en'?'Editorial design':'Diseño editorial'}</li><li>${L=='en'?'Art direction':'Dirección de arte'}</li><li>${L=='en'?'MA, Universidad Gestalt':'Maestría, Universidad Gestalt'}</li></ul></div><div class="shots">${shot('estridente')}${shot('lider')}</div></div>`;
-if(id==='brief')return `<p class="kick">${L=='en'?'Gallery · six more, quickly':'Galería · seis más, rápido'}</p><h2>${L=='en'?'In brief':'En breve'}</h2><div class="list">${BRIEF.map(b=>`<button data-zoom="${b[0]}"><img src="img/${b[0]}.jpg" alt="" loading="lazy"><span>${b[1]}<small>${tr(b[2])}</small></span></button>`).join('')}</div>`;
+function content(id){if(P[id]){const p=P[id];return `<p class="kick">${tr(p.k)} · ${p.y}</p><h2>${tr(p.n)}</h2><p class="deck">${tr(p.d)}</p><div class="grid2"><div><p class="body">${tr(p.b)}</p><ul class="tags">${tr(p.t).map(x=>`<li>${x}</li>`).join('')}</ul>${got.has(id)?`<div class="fact"><b>★ ${tr(UI.fact)}</b><br>${tr(p.s)}</div>`:`<div class="fact">${tr(UI.hidden)}</div>`}</div>${gal(GAL[id]||[])}</div>`}
+if(id==='about')return `<p class="kick">${L=='en'?'Kat’s studio · editor’s letter':'Estudio Kat · carta editorial'}</p><h2>${L=='en'?'Hi, I’m Kat.':'Hola, soy Kat.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Senior graphic designer and art director with ten years across branding, editorial, UX/UI, packaging and paid media. I started out laying out magazines in Mexico and never stopped thinking in spreads. I hold an MA in Editorial Design, I write in two languages, and I use AI as part of the production line, not instead of it.':'Diseñadora gráfica senior y directora de arte con diez años entre branding, editorial, UX/UI, empaque y medios pagados. Empecé formando revistas en México y nunca dejé de pensar en pliegos. Tengo maestría en Diseño Editorial, escribo en dos idiomas y uso la IA como parte de la producción, no en su lugar.'}</p><p class="body">${L=='en'?'Walk east. Every shop on this street is a project, and the street ends where I’m headed.':'Camina hacia la derecha. Cada local de esta calle es un proyecto, y la calle termina hacia donde voy.'}</p></div>${gal(['kat-hd'])}</div>`;
+if(id==='editorial')return `<p class="kick">${L=='en'?'Back issues · editorial design':'Números atrasados · diseño editorial'}</p><h2>${L=='en'?'Before brands, there were magazines.':'Antes de las marcas, hubo revistas.'}</h2><div class="grid2"><div><p class="body">${L=='en'?'Líder, Mexijuku and Estridente taught me the grid, the deadline and the cover line. Líder, on politics and business, was rebuilt around a single editorial grid; Estridente is an independent cultural magazine for Xalapa, art-directed from masthead to colophon.':'Líder, Mexijuku y Estridente me enseñaron la retícula, el cierre y la línea de portada. Líder, de política y negocios, se rehízo alrededor de una sola retícula; Estridente es una revista cultural independiente de Xalapa, con dirección de arte del cabezal al colofón.'}</p><ul class="tags"><li>${L=='en'?'Editorial design':'Diseño editorial'}</li><li>${L=='en'?'Art direction':'Dirección de arte'}</li><li>${L=='en'?'MA, Universidad Gestalt':'Maestría, Universidad Gestalt'}</li></ul></div>${gal(['estr-grid','estr-cover','lider-spread','lider'])}</div>`;
+if(id==='brief')return `<p class="kick">${L=='en'?'Gallery · six more, quickly':'Galería · seis más, rápido'}</p><h2>${L=='en'?'In brief':'En breve'}</h2><div class="list">${BRIEF.map(b=>`<button data-zoom="${b[0]}"><img src="${thumb(b[0])}" alt="" loading="lazy"><span>${b[1]}<small>${tr(b[2])}</small></span></button>`).join('')}</div>`;
 if(id==='contact')return `<p class="kick">${L=='en'?'The red phone box':'La cabina roja'}</p><h2>${L=='en'?'Let’s make the next level.':'Hagamos el siguiente nivel.'}</h2><p class="deck">${L=='en'?'Based in México, relocating to the UK. Open to remote work, in English and Spanish.':'Desde México, mudándome a UK. Abierta a trabajo remoto, en inglés y español.'}</p><ul class="contact"><li><small>Email</small><a href="mailto:akaiart.design@gmail.com">akaiart.design@gmail.com</a></li><li><small>LinkedIn</small><a href="https://linkedin.com/in/karlakatgonzalez">linkedin.com/in/karlakatgonzalez</a></li><li><small>Behance</small><a href="https://www.behance.net/KarlaKetzer">behance.net/KarlaKetzer</a></li><li><small>Web</small><a href="https://katketzer.github.io">katketzer.github.io</a></li></ul>`;
 if(id==='bonus')return `<p class="kick">${L=='en'?'Secret door · 9/9 seals':'Puerta secreta · 9/9 sellos'}</p><h2>${L=='en'?'You found them all.':'Los encontraste todos.'}</h2><p class="deck">${L=='en'?'Here’s who’s on the moodboard behind every shop.':'Esto es lo que hay en el moodboard detrás de cada local.'}</p><ul class="contact">${[[{en:'Fashion',es:'La moda'},{en:'My first reference, always',es:'Mi primera referencia, siempre'}],['Alexey Brodovitch',{en:'For making white space move',es:'Por hacer que el espacio en blanco se mueva'}],['Fabien Baron',{en:'For type that behaves like a photograph',es:'Por tipografía que se comporta como fotografía'}],['Irma Boom',{en:'For books as objects',es:'Por los libros como objetos'}],['Paula Scher',{en:'For loud, joyful identity',es:'Por identidades ruidosas y felices'}],['Vivienne Westwood',{en:'For the nerve',es:'Por la osadía'}]].map(([a,b])=>`<li><small>${tr(b)}</small><span class="px" style="font-size:20px;font-weight:600">${tr(a)}</span></li>`).join('')}</ul>`;
 return ''}
-function list(){return `<p class="kick">${L=='en'?'No game, just the work':'Sin juego, solo el trabajo'}</p><h2>${L=='en'?'Every shop on the street':'Todos los locales de la calle'}</h2><div class="list">${order.filter(id=>id!=='bonus').map(id=>{const p=P[id];const im=p?p.img||'rkt':{about:'kat-hd',editorial:'estridente',brief:'boladeoro',contact:'jarritos'}[id];const n=p?tr(p.n):{about:L=='en'?'About Kat':'Sobre Kat',editorial:L=='en'?'Back issues':'Números atrasados',brief:L=='en'?'In brief':'En breve',contact:L=='en'?'Contact':'Contacto'}[id];
+function list(){return `<p class="kick">${L=='en'?'No game, just the work':'Sin juego, solo el trabajo'}</p><h2>${L=='en'?'Every shop on the street':'Todos los locales de la calle'}</h2><div class="list">${order.filter(id=>id!=='bonus').map(id=>{const p=P[id];const im=p?(GAL[id]||['rkt-store'])[0]:{about:'kat-hd',editorial:'estr-cover',brief:'boladeoro',contact:'jar-canary'}[id];const n=p?tr(p.n):{about:L=='en'?'About Kat':'Sobre Kat',editorial:L=='en'?'Back issues':'Números atrasados',brief:L=='en'?'In brief':'En breve',contact:L=='en'?'Contact':'Contacto'}[id];
 const sub=p?tr(p.k):{about:L=='en'?'Editor’s letter':'Carta editorial',editorial:'Líder · Mexijuku · Estridente',brief:BRIEF.map(b=>b[1]).slice(0,3).join(', ')+'…',contact:'akaiart.design@gmail.com'}[id];
-return `<button data-open="${id}">${id==='qm'?`<div style="aspect-ratio:3/2;background:#141113;color:#7ff5ea;display:grid;place-items:center;font:700 42px Silkscreen,monospace;border-bottom:3px solid #111;text-shadow:0 0 12px #36e0d0">LED</div>`:`<img src="img/${im}.${im==='kat-hd'?'png':'jpg'}" alt="" loading="lazy">`}<span>${n}<small>${sub}</small></span></button>`}).join('')}</div>`}
+return `<button data-open="${id}">${id==='qm'?`<div style="aspect-ratio:3/2;background:#141113;color:#7ff5ea;display:grid;place-items:center;font:700 42px Silkscreen,monospace;border-bottom:3px solid #111;text-shadow:0 0 12px #36e0d0">LED</div>`:`<img src="${thumb(im)}" alt="" loading="lazy" style="background:${LBG[im]||'#fff'};object-fit:${im.startsWith('logo-')||im==='kat-hd'?'contain':'cover'};${im.startsWith('logo-')?'padding:14px':''}">`}<span>${n}<small>${sub}</small></span></button>`}).join('')}</div>`}
 let curId=null;const modal=$('#modal'),win=$('#win');
-function open(id){if(id==='sign'){toast(`<b>${tr(UI.next2)}</b>${tr(UI.nextT)}`);return}curId=id;paused=true;Object.keys(keys).forEach(k=>keys[k]=false);
+function open(id){if(id==='sign'){SFX.blip();toast(`<b>${tr(UI.next2)}</b>${tr(UI.nextT)}`);return}if(!modal.classList.contains('on'))SFX.open();A.duck=.35;curId=id;paused=true;Object.keys(keys).forEach(k=>keys[k]=false);
 const i=order.indexOf(id);const nav=id==='list'?'':`<div class="nav"><button class="pbtn" data-nav="-1" ${i<=0?'disabled':''}>${tr(UI.prev)}</button><button class="pbtn" data-list="1">${tr(UI.list)}</button><button class="pbtn tq" data-nav="1" ${i>=order.length-1?'disabled':''}>${tr(UI.next)}</button></div>`;
 win.innerHTML=`<div class="top"><div></div><button class="pbtn x" data-close="1" aria-label="${tr(UI.close)}">✕</button></div>${id==='list'?list():content(id)}${nav}`;modal.classList.add('on');win.scrollTop=0;win.querySelector('[data-close]').focus()}
-function close(){modal.classList.remove('on');paused=false;curId=null;C.focus()}
+function close(){SFX.close();A.duck=1;modal.classList.remove('on');paused=false;curId=null;C.focus()}
 win.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
 if(b.dataset.close)return close();if(b.dataset.list)return open('list');
 if(b.dataset.open){const o=S.find(s=>s.id===b.dataset.open);if(o&&started){pl.x=o.x+o.w/2;}return open(b.dataset.open)}
 if(b.dataset.nav){const i=order.indexOf(curId)+ +b.dataset.nav;const id=order[i];if(!id)return;const o=S.find(s=>s.id===id);if(o)pl.x=o.x+o.w/2;return open(id)}
-if(b.dataset.zoom){const lb=$('#lb');lb.querySelector('img').src='img/'+b.dataset.zoom+(b.dataset.png||b.dataset.zoom==='kat-hd'?'.png':'.jpg');lb.classList.add('on');$('#lbx').focus()}});
+if(b.dataset.sel){const g=b.closest('.gal'),mb=g.querySelector('.main'),n=b.dataset.sel;mb.dataset.zoom=n;mb.style.background=LBG[n]||'#e9e2d4';mb.querySelector('img').src=full(n);g.querySelectorAll('.thumbs button').forEach(x=>x.classList.toggle('on',x===b));return}
+if(b.dataset.zoom){const lb=$('#lb');lb.querySelector('img').src=full(b.dataset.zoom);lb.classList.add('on');$('#lbx').focus()}});
 modal.addEventListener('click',e=>{if(e.target===modal)close()});
 $('#lb').onclick=()=>$('#lb').classList.remove('on');
-function start(){started=true;$('#intro').style.display='none';$('#stage').classList.add('playing');C.focus()}
+function start(){started=true;audioInit();if(A.ctx&&A.ctx.state==='suspended')A.ctx.resume();$('#intro').style.display='none';$('#stage').classList.add('playing');C.focus()}
 $('#bPlay').onclick=start;$('#bSkip').onclick=()=>open('list');$('#bList').onclick=()=>open('list');
+$('#bSnd').onclick=toggleSound;
 $('#bLang').onclick=()=>{L=L=='en'?'es':'en';try{localStorage.setItem('kg-lang',L)}catch(e){}texts();if(curId)open(curId)};
-function texts(){document.documentElement.lang=L;$('#bList').textContent=tr(UI.list);$('#bLang').textContent=tr(UI.lang);$('#iT').innerHTML=tr(UI.iT);$('#iP').textContent=tr(UI.iP);$('#iK').textContent=tr(UI.iK);$('#bPlay').textContent='▶ '+tr(UI.play);$('#bSkip').textContent=tr(UI.list);$('#h1').textContent=tr(UI.h1);$('#h2').textContent=tr(UI.h2);$('#note').textContent=tr(UI.note);hud()}
+function texts(){document.documentElement.lang=L;$('#bList').textContent=tr(UI.list);$('#bLang').textContent=tr(UI.lang);$('#iT').innerHTML=tr(UI.iT);$('#iP').textContent=tr(UI.iP);$('#iK').textContent=tr(UI.iK);$('#bPlay').textContent='▶ '+tr(UI.play);$('#bSkip').textContent=tr(UI.list);$('#h1').textContent=tr(UI.h1);soundBtn();$('#h2').textContent=tr(UI.h2);$('#note').textContent=tr(UI.note);hud()}
 const KM={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'jump',w:'jump',W:'jump',' ':'jump',e:'enter',E:'enter',Enter:'enter',ArrowDown:'enter',s:'enter',S:'enter'};
 addEventListener('keydown',e=>{if(e.key==='Escape'){if($('#lb').classList.contains('on'))$('#lb').classList.remove('on');else if(modal.classList.contains('on'))close();return}
 if(modal.classList.contains('on')||$('#lb').classList.contains('on'))return;
 if(!started&&(e.key==='Enter'||e.key===' ')){e.preventDefault();start();return}
+if((e.key==='m'||e.key==='M')&&started){toggleSound();return}
 const k=KM[e.key];if(k&&started){e.preventDefault();if((k==='jump'||k==='enter')&&e.repeat)return;keys[k]=true}});
 addEventListener('keyup',e=>{const k=KM[e.key];if(k==='left'||k==='right')keys[k]=false});
 C.addEventListener('pointerdown',e=>{if(!started)return;const r=C.getBoundingClientRect(),wx=(e.clientX-r.left)/r.width*VW+cam,wy=(e.clientY-r.top)/r.height*VH;const o=S.find(o=>wx>=o.x&&wx<=o.x+o.w&&wy>GY-o.h-30&&wy<GY+10&&(o.id!=='bonus'||got.size>=TOTAL));if(o){target=o.x+o.w/2;if(Math.abs(pl.x-target)<8){target=null;open(o.id)}}});
